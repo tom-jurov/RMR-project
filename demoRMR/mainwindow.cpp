@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
-    ipaddress="192.168.1.15";
+    ipaddress="localhost";
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -113,10 +113,10 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 //        robot.setTranslationSpeed(0);
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
-
+    odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
     if(datacounter%5)
     {
-
+        std::cout << "X: " << odom.getX() << " Y: " << odom.getY() << " Heading: " << odom.getHeading() << std::endl;
         ///ak nastavite hodnoty priamo do prvkov okna,ako je to na tychto zakomentovanych riadkoch tak sa moze stat ze vam program padne
                 // ui->lineEdit_2->setText(QString::number(robotdata.EncoderRight));
                 //ui->lineEdit_3->setText(QString::number(robotdata.EncoderLeft));
@@ -160,8 +160,8 @@ int MainWindow::processThisCamera(cv::Mat cameraData)
 {
 
     cameraData.copyTo(frame[(actIndex+1)%3]);//kopirujem do nasej strukury
-    cout<<"W: " << cameraData.size().width<< endl;
-    cout<<"H: " << cameraData.size().height<< endl;
+    //cout<<"W: " << cameraData.size().width<< endl;
+    //cout<<"H: " << cameraData.size().height<< endl;
     actIndex=(actIndex+1)%3;//aktualizujem kde je nova fotka
     updateLaserPicture=1;
     return 0;
@@ -182,7 +182,7 @@ void MainWindow::on_pushButton_9_clicked() //start button
 
     ///ked je vsetko nasetovane tak to tento prikaz spusti (ak nieco nieje setnute,tak to normalne nenastavi.cize ak napr nechcete kameru,vklude vsetky info o nej vymazte)
     robot.robotStart();
-
+    odom.setWheelSeparation(0.23);
 
 
     //ziskanie joystickov
