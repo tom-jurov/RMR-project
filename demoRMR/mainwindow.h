@@ -25,7 +25,7 @@
 #include "opencv2/videoio.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "robot.h"
-
+#include "odometry.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -80,6 +80,8 @@ private:
      Robot robot;
      TKobukiData robotdata;
      int datacounter;
+     diff_drive::Odometry odom;
+
      QTimer *timer;
 
      QJoysticks *instance;

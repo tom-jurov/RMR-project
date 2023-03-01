@@ -6,7 +6,7 @@ win32 {
 LIBS += -lws2_32
 LIBS += -lWinmm
 }
-CONFIG += c++11
+CONFIG += c++17
 DESTDIR = ../bin
 
 win32 {
@@ -75,11 +75,13 @@ INCLUDEPATH += /usr/local/include/opencv4/
 
 SOURCES += \
     CKobuki.cpp \
+    odometry.cpp \
     robot.cpp \
     rplidar.cpp
 
 HEADERS += \
     CKobuki.h \
+    odometry.h \
     robot_global.h \
     robot.h \
     rplidar.h \
