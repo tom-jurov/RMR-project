@@ -19,7 +19,7 @@ bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, c
     if (left_wheel_old_pos_ - left_wheel_current_pos > (USHRT_MAX+1)/2)
     {
         left_wheel_overflow_count_++;
-        std::cout << " Count of overflows " << left_wheel_overflow_count_ << std::endl;
+        //std::cout << " Count of overflows " << left_wheel_overflow_count_ << std::endl;
     }
     if (right_wheel_old_pos_ - right_wheel_current_pos > (USHRT_MAX+1)/2)
     {
@@ -28,7 +28,7 @@ bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, c
     if (left_wheel_current_pos - left_wheel_old_pos_> (USHRT_MAX+1)/2)
     {
         left_wheel_overflow_count_--;
-        std::cout << " Count of overflows " << left_wheel_overflow_count_ << std::endl;
+        //std::cout << " Count of overflows " << left_wheel_overflow_count_ << std::endl;
     }
     if (right_wheel_current_pos - right_wheel_old_pos_ > (USHRT_MAX+1)/2)
     {
@@ -57,6 +57,14 @@ void diff_drive::Odometry::RungeKutta2(double dx_centroid, double dphi_centroid)
     x_ += dx_centroid * cos(direction);
     y_ += dx_centroid * sin(direction);
     heading_ += dphi_centroid;
+    if (heading_ > 2*M_PI)
+    {
+        heading_ = heading_ - 2*M_PI;
+    }
+    if (heading_ < 0)
+    {
+        heading_ = 2*M_PI - heading_;
+    }
 }
 
 void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_centroid)
@@ -68,8 +76,24 @@ void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_cent
     else
     {
         double heading_old = heading_;
+        if (heading_old < 0)
+        {
+            heading_old = 2*M_PI - heading_old;
+        }
+        if (heading_old > 2*M_PI)
+        {
+            heading_old = heading_old - 2*M_PI;
+        }
         double r = dx_centroid / dphi_centroid;
         heading_ += dphi_centroid;
+        if (heading_ > 2*M_PI)
+        {
+            heading_ = heading_ - 2*M_PI;
+        }
+        if (heading_ < 0)
+        {
+            heading_ = 2*M_PI - heading_;
+        }
         x_ += r*(sin(heading_) - sin(heading_old));
         y_ += -r*(cos(heading_) - cos(heading_old));
     }
