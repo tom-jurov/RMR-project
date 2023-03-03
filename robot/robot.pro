@@ -76,6 +76,7 @@ INCLUDEPATH += /usr/local/include/opencv4/
 SOURCES += \
     CKobuki.cpp \
     controller.cpp \
+    map.cpp \
     odometry.cpp \
     robot.cpp \
     rplidar.cpp
@@ -83,6 +84,7 @@ SOURCES += \
 HEADERS += \
     CKobuki.h \
     controller.h \
+    map.h \
     odometry.h \
     robot_global.h \
     robot.h \

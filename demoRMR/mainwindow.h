@@ -27,6 +27,7 @@
 #include "robot.h"
 #include "odometry.h"
 #include "controller.h"
+#include "map.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -87,6 +88,7 @@ private:
      int datacounter;
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
+     diff_drive::Map map;
      QTimer *timer;
 
      QJoysticks *instance;

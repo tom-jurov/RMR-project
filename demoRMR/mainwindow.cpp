@@ -157,7 +157,8 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
-
+    map.update(laserData);
+    std::cout << laserData.Data[0].scanDistance << " , " << laserData.Data[0].scanAngle << " , " << laserData.Data[0].scanQuality << std::endl; // Data[276] = whole revolution
 
     return 0;
 
