@@ -67,6 +67,10 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_pushButton_8_clicked();
+
+    void on_pushButton_10_clicked();
+
     void on_pushButton_clicked();
     void getNewFrame();
 
@@ -86,7 +90,8 @@ private:
      QTimer *timer;
 
      QJoysticks *instance;
-
+     bool first_cycle_ = true;
+     bool start_ = false;
      double forwardspeed;//mm/s
      double rotationspeed;//omega/s
 public slots:

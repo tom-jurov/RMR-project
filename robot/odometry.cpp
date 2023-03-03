@@ -16,6 +16,7 @@ diff_drive::Odometry::Odometry()
 bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos)
 {
     auto [double_left_wheel_old_pos, double_right_wheel_old_pos] = ticksToMeters(left_wheel_old_pos_, right_wheel_old_pos_);
+    //std::cout << left_wheel_current_pos << " " << right_wheel_current_pos << std::endl;
     if (left_wheel_old_pos_ - left_wheel_current_pos > (USHRT_MAX+1)/2)
     {
         left_wheel_overflow_count_++;
@@ -44,7 +45,6 @@ bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, c
 
     double linear_change = (dright_wheel_pos + dleft_wheel_pos) * 0.5;
     double angular_change = (dright_wheel_pos - dleft_wheel_pos) / wheel_separation_;
-
     exactIntegration(linear_change, angular_change);
 
     return true;
@@ -122,4 +122,27 @@ std::pair<double, double> diff_drive::Odometry::ticksToMeters(const unsigned sho
 void diff_drive::Odometry::setWheelSeparation(double value)
 {
     wheel_separation_ = value;
+}
+
+void diff_drive::Odometry::setInitState(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos)
+{
+    left_wheel_old_pos_ = left_wheel_current_pos;
+    right_wheel_old_pos_ = right_wheel_current_pos;
+    //std::cout << left_wheel_old_pos_ << " " << right_wheel_old_pos_ << std::endl;
+
+}
+
+void diff_drive::Odometry::setX(double value)
+{
+    x_ = value;
+}
+
+void diff_drive::Odometry::setY(double value)
+{
+    y_ = value;
+}
+
+void diff_drive::Odometry::setHeading(double value)
+{
+    heading_ = value;
 }

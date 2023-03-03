@@ -95,7 +95,11 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 /// vola sa vzdy ked dojdu nove data z robota. nemusite nic riesit, proste sa to stane
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-
+    if(first_cycle_)
+    {
+        odom.setInitState(robotdata.EncoderLeft, robotdata.EncoderRight);
+        first_cycle_ = false;
+    }
 
     ///tu mozete robit s datami z robota
     /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
@@ -114,9 +118,12 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
     odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
-    controller.setCurrentPosition(odom);
-    auto control_output = controller.controlStep();
-    robot.setArcSpeed(control_output.speed, control_output.radius);
+    if (start_)
+    {
+        controller.setCurrentPosition(odom);
+        auto control_output = controller.controlStep();
+        robot.setArcSpeed(control_output.speed, control_output.radius);
+    }
     if(datacounter%5)
     {
         ///ak nastavite hodnoty priamo do prvkov okna,ako je to na tychto zakomentovanych riadkoch tak sa moze stat ze vam program padne
@@ -231,10 +238,20 @@ robot.setRotationSpeed(-3.14159/2);
 void MainWindow::on_pushButton_4_clicked() //stop
 {
     robot.setTranslationSpeed(0);
-
+    start_=false;
 }
 
+void MainWindow::on_pushButton_8_clicked() //reset
+{
+    odom.setX(0);
+    odom.setY(0);
+    odom.setHeading(0);
+}
 
+void MainWindow::on_pushButton_10_clicked()
+{
+    start_ = true;
+}
 
 
 void MainWindow::on_pushButton_clicked()
