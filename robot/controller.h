@@ -1,6 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 #include "odometry.h"
+#include "robot_global.h"
 #include <vector>
 namespace diff_drive{
     struct Point {
@@ -14,7 +15,7 @@ namespace diff_drive{
         int speed, radius;
     };
 
-    class Controller
+    class ROBOT_EXPORT Controller
     {
     public:
         Controller();

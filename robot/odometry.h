@@ -3,6 +3,7 @@
 #include <iostream>
 #include "robot_global.h"
 #define TICK_TO_METER 0.000085292090497737556558
+#define M_PI 3.14159265359
 namespace diff_drive
 {
     class ROBOT_EXPORT Odometry
