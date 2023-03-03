@@ -24,7 +24,7 @@ namespace diff_drive{
         CTRL_Output controlStep();
     private:
         static int sgn(int num);
-        static unsigned int magnitude(const Point& pt1, const Point& pt2);
+        static double magnitude(const Point& pt1, const Point& pt2);
     private:
         std::vector<Point> path_;
         Robot current_state_;

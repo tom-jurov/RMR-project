@@ -194,7 +194,9 @@ void MainWindow::on_pushButton_9_clicked() //start button
     odom.setWheelSeparation(0.23);
     std::vector<diff_drive::Point> path;
     path.push_back(diff_drive::Point{0,0});
-    path.push_back(diff_drive::Point{1.80,0.75});
+    path.push_back(diff_drive::Point{0.265,0.34});
+    path.push_back(diff_drive::Point{0.426,0.6863});
+    path.push_back(diff_drive::Point{0.2455,1.326});
     controller.setPath(path);
 
     //ziskanie joystickov

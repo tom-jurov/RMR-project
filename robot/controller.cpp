@@ -3,9 +3,9 @@
 diff_drive::Controller::Controller()
 :   path_(std::vector<Point>{})
 ,   current_state_(Robot{0,0,0})
-,   look_ahead_dist_(0.4)
+,   look_ahead_dist_(0.1)
 ,   last_found_index_(0)
-,   linear_velocity_(400)
+,   linear_velocity_(200)
 {
 }
 
@@ -58,31 +58,27 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         dy = y2 - y1;
         dr = sqrt (dx*dx + dy*dy);
 
-        D = x1*y2 + x2*y1;
+        D = x1*y2 - x2*y1;
         discriminant = (look_ahead_dist_ * look_ahead_dist_) * (dr * dr) - (D * D);
-
         if (discriminant >= 0)
         {
             sol_x1 = (D * dy + sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
             sol_x2 = (D * dy - sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
-            sol_y1 = (-D * dx + abs(dy) * sqrt(discriminant)) / (dr * dr);
-            sol_y2 = (-D * dx - abs(dy) * sqrt(discriminant)) / (dr * dr);
+            sol_y1 = (-D * dx + fabs(dy) * sqrt(discriminant)) / (dr * dr);
+            sol_y2 = (-D * dx - fabs(dy) * sqrt(discriminant)) / (dr * dr);
 
             sol_pt1 = {sol_x1 + current_state_.x, sol_y1 + current_state_.y};
             sol_pt2 = {sol_x2 + current_state_.x, sol_y2 + current_state_.y};
-
             minX = std::min(path_[i].x, path_[i+1].x);
             minY = std::min(path_[i].y, path_[i+1].y);
             maxX = std::max(path_[i].x, path_[i+1].x);
             maxY = std::max(path_[i].y, path_[i+1].y);
-
             if (((minX <= sol_pt1.x && sol_pt1.x <= maxX) && (minY <= sol_pt1.y && sol_pt1.y <= maxY)) ||
-                ((minX <= sol_pt2.x && sol_pt1.x <= maxX) && (minY <= sol_pt2.y && sol_pt1.y <= maxY)))
+                ((minX <= sol_pt2.x && sol_pt2.x <= maxX) && (minY <= sol_pt2.y && sol_pt2.y <= maxY)))
             {
                 intersection_found = true;
-
                 if (((minX <= sol_pt1.x && sol_pt1.x <= maxX) && (minY <= sol_pt1.y && sol_pt1.y <= maxY)) &&
-                    ((minX <= sol_pt2.x && sol_pt1.x <= maxX) && (minY <= sol_pt2.y && sol_pt1.y <= maxY)))
+                    ((minX <= sol_pt2.x && sol_pt2.x <= maxX) && (minY <= sol_pt2.y && sol_pt2.y <= maxY)))
                 {
                     if (magnitude(sol_pt1, path_[i+1]) < magnitude(sol_pt2, path_[i+1]))
                     {
@@ -121,28 +117,30 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
             goal_pt = {path_[last_found_index_].x, path_[last_found_index_].y};
         }
     }
-    if ( last_found_index_ == (path_.size()))
+
+    if ( last_found_index_ == path_.size()-1)
     {
         if ( fabs(path_.back().x - current_state_.x) < 0.04 && fabs(path_.back().y - current_state_.y) < 0.04)
         {
             return {0,0};
         }
     }
-    double Kp = 0.053;
+    double Kp = 0.2;
     double target_angle = atan2( (goal_pt.y - current_state_.y), (goal_pt.x - current_state_.x) );
+
     if (target_angle < 0)
     {
         target_angle += 2*M_PI;
     }
 
     double turn_error = target_angle - current_state_.heading;
+
     if (turn_error > M_PI || turn_error < -M_PI)
     {
-        turn_error = -1 * sgn(turn_error) * (2*M_PI - abs(turn_error));
+        turn_error = -1 * sgn(turn_error) * (2*M_PI - fabs(turn_error));
     }
 
     double turn_vel = Kp * turn_error;
-
     return {linear_velocity_, static_cast<int>(linear_velocity_ / turn_vel)};
 }
 
@@ -155,7 +153,7 @@ int diff_drive::Controller::sgn(int num)
     return -1;
 }
 
-unsigned int diff_drive::Controller::magnitude(const Point &pt1, const Point &pt2)
+double diff_drive::Controller::magnitude(const Point &pt1, const Point &pt2)
 {
     return sqrt((pt2.x - pt1.x)*(pt2.x - pt1.x) + (pt2.y - pt1.y)*(pt2.y - pt1.y));
 }
