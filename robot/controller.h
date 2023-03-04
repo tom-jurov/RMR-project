@@ -3,11 +3,8 @@
 #include "odometry.h"
 #include "robot_global.h"
 #include <vector>
-namespace diff_drive{
-    struct Point {
-        double x, y;
-    };
-
+namespace diff_drive
+{
     struct Robot {
         double x, y, heading;
     };
