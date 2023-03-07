@@ -3,9 +3,10 @@
 diff_drive::Controller::Controller()
 :   path_(std::vector<Point>{})
 ,   current_state_(Robot{0,0,0})
-,   look_ahead_dist_(0.1)
+,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
-,   linear_velocity_(200)
+,   linear_velocity_(0)
+,   treshold_(0.5)
 {
 }
 
@@ -118,14 +119,6 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         }
     }
 
-    if ( last_found_index_ == path_.size()-1)
-    {
-        if ( fabs(path_.back().x - current_state_.x) < 0.04 && fabs(path_.back().y - current_state_.y) < 0.04)
-        {
-            return {0,0};
-        }
-    }
-    double Kp = 0.2;
     double target_angle = atan2( (goal_pt.y - current_state_.y), (goal_pt.x - current_state_.x) );
 
     if (target_angle < 0)
@@ -140,8 +133,29 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         turn_error = -1 * sgn(turn_error) * (2*M_PI - fabs(turn_error));
     }
 
-    double turn_vel = Kp * turn_error;
-    return {linear_velocity_, static_cast<int>(linear_velocity_ / turn_vel)};
+    if ( last_found_index_ == path_.size()-1)
+    {
+        double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point&>(current_state_));
+        std::cout << distance_to_go << std::endl;
+        if ( distance_to_go < treshold_)
+        {
+            if (distance_to_go < 0.02)
+            {
+                linear_velocity_ = 0;
+                last_found_index_ = 0;
+                current_state_ = Robot{0,0,0};
+                return {0,0};
+            }
+            int speed_down = linear_velocity_/treshold_*distance_to_go;
+            int local_look_ahead = look_ahead_dist_/treshold_*distance_to_go;
+            double r = 1000*local_look_ahead/(2*sin(turn_error));
+            return {speed_down,r};
+        }
+    }
+    if (linear_velocity_ < 400)
+        linear_velocity_ += 10;
+    double r = 1000*look_ahead_dist_/(2*sin(turn_error));
+    return {linear_velocity_, static_cast<int>(r)};
 }
 
 int diff_drive::Controller::sgn(int num)
