@@ -16,8 +16,9 @@ namespace diff_drive
         void update(const LaserMeasurement& laser_measurement, const diff_drive::Odometry& odom);
         void print_map();
     private:
-        std::vector<diff_drive::Point> laserToMapPoints(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir);
+        std::vector<diff_drive::Point> get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir);
         void resize_map(const std::vector<diff_drive::Point>& new_points);
+        void fill_map(const std::vector<diff_drive::Point>& new_points);
         double deg2rad(double degrees);
     private:
         int map_size_x_;

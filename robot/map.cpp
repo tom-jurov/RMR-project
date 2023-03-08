@@ -12,12 +12,13 @@ void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const di
 {
     std::vector<diff_drive::Point> new_points(laser_measurement.numberOfScans);
 
-    new_points = laserToMapPoints(laser_measurement, odom.getX(), odom.getY(), odom.getHeading());
+    new_points = get_new_points(laser_measurement, odom.getX(), odom.getY(), odom.getHeading());
     resize_map(new_points);
+    fill_map(new_points);
 
 }
 
-std::vector<diff_drive::Point> diff_drive::Map::laserToMapPoints(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir)
+std::vector<diff_drive::Point> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir)
 {
     std::vector<diff_drive::Point> points;
     diff_drive::Point point;
@@ -27,7 +28,7 @@ std::vector<diff_drive::Point> diff_drive::Map::laserToMapPoints(const LaserMeas
         double laser_dis = laser_measurement.Data[i].scanDistance;
 
         // xr, yr [m], laser distance [mm]
-        if((laser_dis > 200 && laser_dis < 600) || (laser_dis > 750 && laser_dis < 2700)){
+        if((laser_dis > 150 && laser_dis < 650) || (laser_dis > 700 && laser_dis < 2700)){
             point.x = (int)((xr*1000 + laser_dis*cos(fir + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
             point.y = (int)((yr*1000 + laser_dis*sin(fir + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
             points.emplace_back(point);
@@ -41,65 +42,89 @@ void diff_drive::Map::resize_map(const std::vector<diff_drive::Point>& new_point
 {
     for(int i = 0; i < new_points.size(); i++)
     {
-        if((new_points[i].x + zero_offset_x_) > map_size_x_)
-        {
-            map_size_x_ = (int)new_points[i].x + zero_offset_x_;
-            map_.resize(map_size_x_, std::vector<int>(map_size_y_, 0));
-
-        }
-        if((new_points[i].y + zero_offset_y_) > map_size_y_)
-        {
-            map_size_y_ = (int)new_points[i].y + zero_offset_y_;
-            for (auto &row: map_) row.resize(map_size_y_);
-        }
-
         if((new_points[i].x < 0) && ((int)new_points[i].x + zero_offset_x_ < 0))
         {
-            int offset_delta = (int)abs(new_points[i].x) - zero_offset_x_;
+            int delta_x = (int)abs(new_points[i].x) - zero_offset_x_;
             int old_size_x =  map_size_x_;
 
-            std::cout << offset_delta << " , Px:" << new_points[i].x << " , Ox:"<< zero_offset_x_ << std::endl;
-            map_size_x_ = map_size_x_ + offset_delta;
+            map_size_x_ = map_size_x_ + delta_x;
             map_.resize(map_size_x_, std::vector<int>(map_size_y_, 0));
-            zero_offset_x_ = zero_offset_x_ + offset_delta;
+            zero_offset_x_ = zero_offset_x_ + delta_x;
 
+            // Offsetting map by new offset
             for(int y = map_size_y_ - 1; y >= 0; y--)
             {
                 for(int x = map_size_x_ - 1; x >= map_size_x_ - old_size_x; x--)
                 {
-                    map_[x][y] = map_[x - offset_delta][y];
+                    map_[x][y] = map_[x - delta_x][y];
+                    map_[x - delta_x][y] = 0;
                 }
             }
         }
 
         if((new_points[i].y < 0) && ((int)new_points[i].y + zero_offset_y_ < 0))
         {
-            int offset_delta = (int)abs(new_points[i].y) - zero_offset_y_;
+            int delta_y = (int)abs(new_points[i].y) - zero_offset_y_;
             int old_size_y =  map_size_y_;
 
-            std::cout << offset_delta << " , Py:" << new_points[i].y << " , Oy:"<< zero_offset_y_ << std::endl;
-            map_size_y_ = map_size_y_ + offset_delta;
+            map_size_y_ = map_size_y_ + delta_y;
             for (auto &row: map_) row.resize(map_size_y_);
-            zero_offset_y_ = zero_offset_y_ + offset_delta;
+            zero_offset_y_ = zero_offset_y_ + delta_y;
 
+            // Offsetting map by new offset
             for(int y = map_size_y_ - 1; y >= map_size_y_ - old_size_y; y--)
             {
                 for(int x = map_size_x_ - 1; x >= 0; x--)
                 {
-                    map_[x][y] = map_[x][y - offset_delta];
+                    map_[x][y] = map_[x][y - delta_y];
+                    map_[x][y - delta_y] = 0;
                 }
             }
+        }
+
+        if((new_points[i].x + zero_offset_x_ + 1) > map_size_x_)
+        {
+            int delta_x = (int)new_points[i].x - map_size_x_ + zero_offset_x_ + 1;
+
+            map_size_x_ = map_size_x_ + delta_x;
+            map_.resize(map_size_x_, std::vector<int>(map_size_y_, 0));
+
+        }
+
+        if((new_points[i].y + zero_offset_y_ + 1) > map_size_y_)
+        {
+            int delta_y = (int)new_points[i].y - map_size_y_ + zero_offset_y_ + 1;
+
+            map_size_y_ = map_size_y_ + delta_y;
+            for (auto &row: map_) row.resize(map_size_y_);
         }
     }
 }
 
+void diff_drive::Map::fill_map(const std::vector<diff_drive::Point>& new_points)
+{
+    int x, y;
+
+    for(int i = 0; i < new_points.size(); i++)
+    {
+        x = (int)new_points[i].x + zero_offset_x_;
+        y = (int)new_points[i].y + zero_offset_y_;
+        if(x < map_size_x_ && y < map_size_y_)
+        {
+            map_[x][y] = 1;
+        }
+    }
+
+    map_[0 + zero_offset_x_][0 + zero_offset_y_] = 3; // Dont forget to delete later !!!!
+}
+
 void diff_drive::Map::print_map()
 {
-    for(int j = 0; j < map_size_x_ - 1; j++)
+    for(int y = map_size_y_ - 1; y >= 0; y--)
     {
-        for(int i = 0;i < map_size_y_ - 1; i++)
+        for(int x = 0;x < map_size_x_; x++)
         {
-            std::cout << map_[j][i];
+            std::cout << map_[x][y];
         }
         std::cout << std::endl;
     }
