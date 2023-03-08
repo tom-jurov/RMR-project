@@ -62,6 +62,15 @@ void diff_drive::Map::resize_map(const std::vector<diff_drive::Point>& new_point
             }
         }
 
+        if((new_points[i].x + zero_offset_x_ + 1) > map_size_x_)
+        {
+            int delta_x = (int)new_points[i].x - map_size_x_ + zero_offset_x_ + 1;
+
+            map_size_x_ = map_size_x_ + delta_x;
+            map_.resize(map_size_x_, std::vector<int>(map_size_y_, 0));
+
+        }
+
         if((new_points[i].y < 0) && ((int)new_points[i].y + zero_offset_y_ < 0))
         {
             int delta_y = (int)abs(new_points[i].y) - zero_offset_y_;
@@ -82,15 +91,6 @@ void diff_drive::Map::resize_map(const std::vector<diff_drive::Point>& new_point
             }
         }
 
-        if((new_points[i].x + zero_offset_x_ + 1) > map_size_x_)
-        {
-            int delta_x = (int)new_points[i].x - map_size_x_ + zero_offset_x_ + 1;
-
-            map_size_x_ = map_size_x_ + delta_x;
-            map_.resize(map_size_x_, std::vector<int>(map_size_y_, 0));
-
-        }
-
         if((new_points[i].y + zero_offset_y_ + 1) > map_size_y_)
         {
             int delta_y = (int)new_points[i].y - map_size_y_ + zero_offset_y_ + 1;
@@ -109,10 +109,7 @@ void diff_drive::Map::fill_map(const std::vector<diff_drive::Point>& new_points)
     {
         x = (int)new_points[i].x + zero_offset_x_;
         y = (int)new_points[i].y + zero_offset_y_;
-        if(x < map_size_x_ && y < map_size_y_)
-        {
-            map_[x][y] = 1;
-        }
+        map_[x][y] = 1;
     }
 
     map_[0 + zero_offset_x_][0 + zero_offset_y_] = 3; // Dont forget to delete later !!!!
