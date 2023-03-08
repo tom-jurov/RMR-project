@@ -26,6 +26,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include "robot.h"
 #include "odometry.h"
+#include "controller.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -66,6 +67,10 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_pushButton_8_clicked();
+
+    void on_pushButton_10_clicked();
+
     void on_pushButton_clicked();
     void getNewFrame();
 
@@ -81,11 +86,12 @@ private:
      TKobukiData robotdata;
      int datacounter;
      diff_drive::Odometry odom;
-
+     diff_drive::Controller controller;
      QTimer *timer;
 
      QJoysticks *instance;
-
+     bool first_cycle_ = true;
+     bool start_ = false;
      double forwardspeed;//mm/s
      double rotationspeed;//omega/s
 public slots:

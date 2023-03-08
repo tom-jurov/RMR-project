@@ -16,6 +16,10 @@ namespace diff_drive
         double getY() const;
         std::pair<double, double> ticksToMeters(const unsigned short left_encoder, const unsigned short right_encoder);
         void setWheelSeparation(double value);
+        void setInitState(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos);
+        void setX(double value);
+        void setY(double value);
+        void setHeading(double value);
 
     private:
         void RungeKutta2(double dx_centroid, double dphi_centroid);

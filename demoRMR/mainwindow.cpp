@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-
+#define SIM 1
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,7 +17,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
-    ipaddress="localhost";
+#if SIM
+    ipaddress="127.0.0.1";
+#else
+    ipaddress="192.168.1.15";
+#endif
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -95,7 +99,11 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 /// vola sa vzdy ked dojdu nove data z robota. nemusite nic riesit, proste sa to stane
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-
+    if(first_cycle_)
+    {
+        odom.setInitState(robotdata.EncoderLeft, robotdata.EncoderRight);
+        first_cycle_ = false;
+    }
 
     ///tu mozete robit s datami z robota
     /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
@@ -114,18 +122,23 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
     odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
+    if (start_)
+    {
+        controller.setCurrentPosition(odom);
+        auto control_output = controller.controlStep();
+        robot.setArcSpeed(control_output.speed, control_output.radius);
+    }
     if(datacounter%5)
     {
-        std::cout << "X: " << odom.getX() << " Y: " << odom.getY() << " Heading: " << odom.getHeading() << std::endl;
         ///ak nastavite hodnoty priamo do prvkov okna,ako je to na tychto zakomentovanych riadkoch tak sa moze stat ze vam program padne
-                // ui->lineEdit_2->setText(QString::number(robotdata.EncoderRight));
-                //ui->lineEdit_3->setText(QString::number(robotdata.EncoderLeft));
-                //ui->lineEdit_4->setText(QString::number(robotdata.GyroAngle));
+                ///ui->lineEdit_2->setText(QString::number(odom.getX()));
+                ///ui->lineEdit_3->setText(QString::number(odom.getY()));
+                ///ui->lineEdit_4->setText(QString::number(odom.getHeading()));
                 /// lepsi pristup je nastavit len nejaku premennu, a poslat signal oknu na prekreslenie
                 /// okno pocuva vo svojom slote a vasu premennu nastavi tak ako chcete. prikaz emit to presne takto spravi
                 /// viac o signal slotoch tu: https://doc.qt.io/qt-5/signalsandslots.html
         ///posielame sem nezmysli.. pohrajte sa nech sem idu zmysluplne veci
-        emit uiValuesChanged(robotdata.EncoderLeft,11,12);
+        emit uiValuesChanged(odom.getX(),odom.getY(),odom.getHeading());
         ///toto neodporucam na nejake komplikovane struktury.signal slot robi kopiu dat. radsej vtedy posielajte
         /// prazdny signal a slot bude vykreslovat strukturu (vtedy ju musite mat samozrejme ako member premmennu v mainwindow.ak u niekoho najdem globalnu premennu,tak bude cistit bludisko zubnou kefkou.. kefku dodam)
         /// vtedy ale odporucam pouzit mutex, aby sa vam nestalo ze budete pocas vypisovania prepisovat niekde inde
@@ -183,7 +196,12 @@ void MainWindow::on_pushButton_9_clicked() //start button
     ///ked je vsetko nasetovane tak to tento prikaz spusti (ak nieco nieje setnute,tak to normalne nenastavi.cize ak napr nechcete kameru,vklude vsetky info o nej vymazte)
     robot.robotStart();
     odom.setWheelSeparation(0.23);
-
+    std::vector<diff_drive::Point> path;
+    path.push_back(diff_drive::Point{0,0});
+    path.push_back(diff_drive::Point{0.265,0.34});
+    path.push_back(diff_drive::Point{0.426,0.6863});
+    path.push_back(diff_drive::Point{0.2455,1.326});
+    controller.setPath(path);
 
     //ziskanie joystickov
     instance = QJoysticks::getInstance();
@@ -225,11 +243,21 @@ robot.setRotationSpeed(-3.14159/2);
 
 void MainWindow::on_pushButton_4_clicked() //stop
 {
-    robot.setTranslationSpeed(0);
-
+    robot.setArcSpeed(0,0);
+    start_=false;
 }
 
+void MainWindow::on_pushButton_8_clicked() //reset
+{
+    odom.setX(0);
+    odom.setY(0);
+    odom.setHeading(0);
+}
 
+void MainWindow::on_pushButton_10_clicked()
+{
+    start_ = true;
+}
 
 
 void MainWindow::on_pushButton_clicked()
