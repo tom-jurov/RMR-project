@@ -3,8 +3,8 @@
 #include "odometry.h"
 #include "robot_global.h"
 #include <vector>
-namespace diff_drive
-{
+#include "utility.h"
+namespace diff_drive{
     struct Robot {
         double x, y, heading;
     };
@@ -18,17 +18,16 @@ namespace diff_drive
         Controller();
         ~Controller() = default;
         void setCurrentPosition(const diff_drive::Odometry& odom);
-        void setPath(const std::vector<Point>& path);
+        void setPath(const std::vector<Point<double>>& path);
         CTRL_Output controlStep();
+
     private:
-        static int sgn(int num);
-        static unsigned int magnitude(const Point& pt1, const Point& pt2);
-    private:
-        std::vector<Point> path_;
+        std::vector<Point<double>> path_;
         Robot current_state_;
         double look_ahead_dist_;
         unsigned int last_found_index_;
         int linear_velocity_;
+        double treshold_;
     };
 }
 

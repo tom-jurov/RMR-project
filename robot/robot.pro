@@ -89,7 +89,8 @@ HEADERS += \
     robot_global.h \
     robot.h \
     rplidar.h \
-    szevent.h
+    szevent.h \
+    utility.h
 
 # Default rules for deployment.
 unix {

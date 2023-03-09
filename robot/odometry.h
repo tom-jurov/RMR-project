@@ -19,7 +19,7 @@ namespace diff_drive
         double getHeading() const;
         double getX() const;
         double getY() const;
-        std::pair<double, double> ticksToMeters(const unsigned short left_encoder, const unsigned short right_encoder);
+        std::pair<double, double> ticksToMeters(short left_encoder, short right_encoder);
         void setWheelSeparation(double value);
         void setInitState(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos);
         void setX(double value);
@@ -42,8 +42,6 @@ namespace diff_drive
         //Old position of wheels [rad]:
         unsigned short left_wheel_old_pos_;
         unsigned short right_wheel_old_pos_;
-        int left_wheel_overflow_count_;
-        int right_wheel_overflow_count_;
     };
 }
 
