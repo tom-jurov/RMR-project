@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 1
+#define SIM 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -161,7 +161,8 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
-
+    map.update(laserData, odom);
+    //std::cout << laserData.Data[0].scanDistance << " , " << laserData.Data[0].scanAngle << " , " << laserData.Data[0].scanQuality << std::endl; // Data[276] = whole revolution
 
     return 0;
 
@@ -198,9 +199,9 @@ void MainWindow::on_pushButton_9_clicked() //start button
     odom.setWheelSeparation(0.23);
     std::vector<diff_drive::Point<double>> path;
     path.push_back(diff_drive::Point<double>{0,0});
-    path.push_back(diff_drive::Point<double>{0.265,0.34});
-    path.push_back(diff_drive::Point<double>{0.426,0.6863});
-    path.push_back(diff_drive::Point<double>{0.2455,1.326});
+    path.push_back(diff_drive::Point<double>{0.0525,3.17});
+    path.push_back(diff_drive::Point<double>{2.427,3.17});
+    path.push_back(diff_drive::Point<double>{3.327,0.297});
     controller.setPath(path);
 
     //ziskanie joystickov
@@ -259,6 +260,10 @@ void MainWindow::on_pushButton_10_clicked()
     start_ = true;
 }
 
+void MainWindow::on_pushButton_11_clicked()
+{
+    map.print_map();
+}
 
 void MainWindow::on_pushButton_clicked()
 {

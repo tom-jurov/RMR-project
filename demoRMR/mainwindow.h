@@ -27,6 +27,7 @@
 #include "robot.h"
 #include "odometry.h"
 #include "controller.h"
+#include "map.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -71,6 +72,8 @@ private slots:
 
     void on_pushButton_10_clicked();
 
+    void on_pushButton_11_clicked();
+
     void on_pushButton_clicked();
     void getNewFrame();
 
@@ -87,6 +90,7 @@ private:
      int datacounter;
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
+     diff_drive::Map map;
      QTimer *timer;
 
      QJoysticks *instance;

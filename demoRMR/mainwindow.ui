@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>804</width>
-    <height>624</height>
+    <height>686</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,6 +224,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_11">
+        <property name="text">
+         <string>Print map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -319,7 +326,7 @@
      <x>0</x>
      <y>0</y>
      <width>804</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

@@ -6,6 +6,7 @@ diff_drive::Controller::Controller()
 ,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
 ,   linear_velocity_(0)
+,   goal_velocity_(200)
 ,   treshold_(0.5)
 {
 }
@@ -152,8 +153,8 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
             return {speed_down,static_cast<int>(r)};
         }
     }
-    if (linear_velocity_ < 400)
-        linear_velocity_ += 10;
+    if (linear_velocity_ < goal_velocity_)
+        linear_velocity_ += static_cast<int>(goal_velocity_/40);
     double r = 1000*look_ahead_dist_/(2*sin(turn_error));
     return {linear_velocity_, static_cast<int>(r)};
 }

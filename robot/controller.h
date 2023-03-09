@@ -1,6 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 #include "odometry.h"
+#include "robot_global.h"
 #include <vector>
 #include "utility.h"
 namespace diff_drive{
@@ -11,7 +12,7 @@ namespace diff_drive{
         int speed, radius;
     };
 
-    class Controller
+    class ROBOT_EXPORT Controller
     {
     public:
         Controller();
@@ -26,6 +27,7 @@ namespace diff_drive{
         double look_ahead_dist_;
         unsigned int last_found_index_;
         int linear_velocity_;
+        double goal_velocity_;
         double treshold_;
     };
 }
