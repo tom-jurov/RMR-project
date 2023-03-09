@@ -1,7 +1,7 @@
 #include "controller.h"
 #include <cmath>
 diff_drive::Controller::Controller()
-:   path_(std::vector<Point>{})
+:   path_(std::vector<Point<double>>{})
 ,   current_state_(Robot{0,0,0})
 ,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
@@ -15,7 +15,7 @@ void diff_drive::Controller::setCurrentPosition(const diff_drive::Odometry &odom
     current_state_ = {odom.getX(), odom.getY(), odom.getHeading()};
 }
 
-void diff_drive::Controller::setPath(const std::vector<Point> &path)
+void diff_drive::Controller::setPath(const std::vector<Point<double>> &path)
 {
     path_ = path;
 }
@@ -45,10 +45,10 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     double maxX = 0;
     double maxY = 0;
 
-    Point sol_pt1{};
-    Point sol_pt2{};
+    Point<double> sol_pt1{};
+    Point<double> sol_pt2{};
 
-    Point goal_pt{};
+    Point<double> goal_pt{};
     for (std::size_t i = starting_index; i<path_.size(); ++i)
     {
         x1 = path_[i].x - current_state_.x;
@@ -101,7 +101,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
                         goal_pt = sol_pt2;
                     }
                 }
-                if (magnitude(goal_pt, path_[i+1]) < magnitude(Point{current_state_.x, current_state_.y},path_[i+1]))
+                if (magnitude(goal_pt, path_[i+1]) < magnitude(Point<double>{current_state_.x, current_state_.y},path_[i+1]))
                 {
                     last_found_index_ = i;
                     break;
@@ -135,7 +135,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
 
     if ( last_found_index_ == path_.size()-1)
     {
-        double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point&>(current_state_));
+        double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
         std::cout << distance_to_go << std::endl;
         if ( distance_to_go < treshold_)
         {
@@ -149,25 +149,11 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
             int speed_down = linear_velocity_/treshold_*distance_to_go;
             int local_look_ahead = look_ahead_dist_/treshold_*distance_to_go;
             double r = 1000*local_look_ahead/(2*sin(turn_error));
-            return {speed_down,r};
+            return {speed_down,static_cast<int>(r)};
         }
     }
     if (linear_velocity_ < 400)
         linear_velocity_ += 10;
     double r = 1000*look_ahead_dist_/(2*sin(turn_error));
     return {linear_velocity_, static_cast<int>(r)};
-}
-
-int diff_drive::Controller::sgn(int num)
-{
-    if (num>=0)
-    {
-        return 1;
-    }
-    return -1;
-}
-
-double diff_drive::Controller::magnitude(const Point &pt1, const Point &pt2)
-{
-    return sqrt((pt2.x - pt1.x)*(pt2.x - pt1.x) + (pt2.y - pt1.y)*(pt2.y - pt1.y));
 }

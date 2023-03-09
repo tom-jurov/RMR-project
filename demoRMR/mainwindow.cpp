@@ -196,11 +196,11 @@ void MainWindow::on_pushButton_9_clicked() //start button
     ///ked je vsetko nasetovane tak to tento prikaz spusti (ak nieco nieje setnute,tak to normalne nenastavi.cize ak napr nechcete kameru,vklude vsetky info o nej vymazte)
     robot.robotStart();
     odom.setWheelSeparation(0.23);
-    std::vector<diff_drive::Point> path;
-    path.push_back(diff_drive::Point{0,0});
-    path.push_back(diff_drive::Point{0.265,0.34});
-    path.push_back(diff_drive::Point{0.426,0.6863});
-    path.push_back(diff_drive::Point{0.2455,1.326});
+    std::vector<diff_drive::Point<double>> path;
+    path.push_back(diff_drive::Point<double>{0,0});
+    path.push_back(diff_drive::Point<double>{0.265,0.34});
+    path.push_back(diff_drive::Point<double>{0.426,0.6863});
+    path.push_back(diff_drive::Point<double>{0.2455,1.326});
     controller.setPath(path);
 
     //ziskanie joystickov
