@@ -4,6 +4,7 @@
 #include "rplidar.h"
 #include "robot_global.h"
 #include <vector>
+#include "utility.h"
 #define GRID_RESOLUTION 50 // [mm]
 
 namespace diff_drive
@@ -16,9 +17,9 @@ namespace diff_drive
         void update(const LaserMeasurement& laser_measurement, const diff_drive::Odometry& odom);
         void print_map();
     private:
-        std::vector<diff_drive::Point> get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir);
-        void resize_map(const std::vector<diff_drive::Point>& new_points);
-        void fill_map(const std::vector<diff_drive::Point>& new_points);
+        std::vector<diff_drive::Point<int>> get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir);
+        void resize_map(const std::vector<diff_drive::Point<int>>& new_points);
+        void fill_map(const std::vector<diff_drive::Point<int>>& new_points);
         double deg2rad(double degrees);
     private:
         int map_size_x_;

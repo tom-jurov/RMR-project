@@ -27,6 +27,7 @@ namespace diff_drive{
         double look_ahead_dist_;
         unsigned int last_found_index_;
         int linear_velocity_;
+        double goal_velocity_;
         double treshold_;
     };
 }

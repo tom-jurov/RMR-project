@@ -10,7 +10,7 @@ diff_drive::Map::Map()
 
 void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const diff_drive::Odometry& odom)
 {
-    std::vector<diff_drive::Point> new_points(laser_measurement.numberOfScans);
+    std::vector<diff_drive::Point<int>> new_points(laser_measurement.numberOfScans);
 
     new_points = get_new_points(laser_measurement, odom.getX(), odom.getY(), odom.getHeading());
     resize_map(new_points);
@@ -18,10 +18,10 @@ void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const di
 
 }
 
-std::vector<diff_drive::Point> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir)
+std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir)
 {
-    std::vector<diff_drive::Point> points;
-    diff_drive::Point point;
+    std::vector<diff_drive::Point<int>> points;
+    diff_drive::Point<int> point;
 
     for(int i = 0; i < laser_measurement.numberOfScans; i++)
     {
@@ -38,7 +38,7 @@ std::vector<diff_drive::Point> diff_drive::Map::get_new_points(const LaserMeasur
     return points;
 }
 
-void diff_drive::Map::resize_map(const std::vector<diff_drive::Point>& new_points)
+void diff_drive::Map::resize_map(const std::vector<diff_drive::Point<int>>& new_points)
 {
     for(int i = 0; i < new_points.size(); i++)
     {
@@ -101,7 +101,7 @@ void diff_drive::Map::resize_map(const std::vector<diff_drive::Point>& new_point
     }
 }
 
-void diff_drive::Map::fill_map(const std::vector<diff_drive::Point>& new_points)
+void diff_drive::Map::fill_map(const std::vector<diff_drive::Point<int>>& new_points)
 {
     int x, y;
 

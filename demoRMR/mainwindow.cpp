@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 1
+#define SIM 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,7 +19,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
 #if SIM
     ipaddress="127.0.0.1";
-    //ipaddress="192.168.1.15";
+#else
+    ipaddress="192.168.1.15";
+#endif
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -197,9 +199,9 @@ void MainWindow::on_pushButton_9_clicked() //start button
     odom.setWheelSeparation(0.23);
     std::vector<diff_drive::Point<double>> path;
     path.push_back(diff_drive::Point<double>{0,0});
-    path.push_back(diff_drive::Point<double>{0.265,0.34});
-    path.push_back(diff_drive::Point<double>{0.426,0.6863});
-    path.push_back(diff_drive::Point<double>{0.2455,1.326});
+    path.push_back(diff_drive::Point<double>{0.0525,3.17});
+    path.push_back(diff_drive::Point<double>{2.427,3.17});
+    path.push_back(diff_drive::Point<double>{3.327,0.297});
     controller.setPath(path);
 
     //ziskanie joystickov

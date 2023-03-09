@@ -6,9 +6,9 @@
 #define M_PI 3.14159265359
 namespace diff_drive
 {
-    struct Point {
+    /*struct Point {
         double x, y;
-    };
+    };*/
 
     class ROBOT_EXPORT Odometry
     {
