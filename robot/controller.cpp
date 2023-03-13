@@ -6,7 +6,7 @@ diff_drive::Controller::Controller()
 ,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
 ,   linear_velocity_(0)
-,   goal_velocity_(200)
+,   goal_velocity_(400)
 ,   treshold_(0.5)
 {
 }
@@ -137,7 +137,6 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     if ( last_found_index_ == path_.size()-1)
     {
         double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
-        std::cout << distance_to_go << std::endl;
         if ( distance_to_go < treshold_)
         {
             if (distance_to_go < 0.02)

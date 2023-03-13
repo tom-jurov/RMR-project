@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 0
+#define SIM 1
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -263,6 +263,14 @@ void MainWindow::on_pushButton_10_clicked()
 void MainWindow::on_pushButton_11_clicked()
 {
     map.print_map();
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    TMapArea map;
+    map_loader loader;
+    loader.load_map("priestor.txt", map);
+    std::cout << map.numofObjects << std::endl;
 }
 
 void MainWindow::on_pushButton_clicked()

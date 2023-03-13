@@ -28,6 +28,7 @@
 #include "odometry.h"
 #include "controller.h"
 #include "map.h"
+#include "map_loader.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -73,6 +74,8 @@ private slots:
     void on_pushButton_10_clicked();
 
     void on_pushButton_11_clicked();
+
+    void on_pushButton_12_clicked();
 
     void on_pushButton_clicked();
     void getNewFrame();

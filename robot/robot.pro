@@ -77,6 +77,7 @@ SOURCES += \
     CKobuki.cpp \
     controller.cpp \
     map.cpp \
+    map_loader.cpp \
     odometry.cpp \
     robot.cpp \
     rplidar.cpp
@@ -85,6 +86,7 @@ HEADERS += \
     CKobuki.h \
     controller.h \
     map.h \
+    map_loader.h \
     odometry.h \
     robot_global.h \
     robot.h \
@@ -97,3 +99,6 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    priestor.txt
