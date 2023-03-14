@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 0
+#define SIM 1
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -161,8 +161,11 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
-    map.update(laserData, odom);
-    //std::cout << laserData.Data[0].scanDistance << " , " << laserData.Data[0].scanAngle << " , " << laserData.Data[0].scanQuality << std::endl; // Data[276] = whole revolution
+
+    if(odom.getAngularSpeed() < fabs(0.001))
+    {
+        map.update(laserData, odom);
+    }
 
     return 0;
 

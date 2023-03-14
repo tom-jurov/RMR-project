@@ -19,6 +19,7 @@ namespace diff_drive
         double getHeading() const;
         double getX() const;
         double getY() const;
+        double getAngularSpeed() const;
         std::pair<double, double> ticksToMeters(short left_encoder, short right_encoder);
         void setWheelSeparation(double value);
         void setInitState(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos);
@@ -35,6 +36,9 @@ namespace diff_drive
         double x_;         // [m]
         double y_;         // [m]
         double heading_;   // [rad]
+
+        // Centroid speeds:
+        double angular_change_; // [rad/s]
 
         //Wheel parameters [m]:
         double wheel_separation_;

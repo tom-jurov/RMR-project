@@ -8,6 +8,7 @@ diff_drive::Odometry::Odometry()
 , wheel_separation_(0.0)
 , left_wheel_old_pos_(0)
 , right_wheel_old_pos_(0)
+, angular_change_(0)
 {
 }
 
@@ -47,15 +48,15 @@ bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, c
     right_wheel_old_pos_ = right_wheel_current_pos;
 
     double linear_change = (dright_wheel_pos + dleft_wheel_pos) * 0.5;
-    double angular_change = (dright_wheel_pos - dleft_wheel_pos) / wheel_separation_;
-    exactIntegration(linear_change, angular_change);
+    angular_change_ = (dright_wheel_pos - dleft_wheel_pos) / wheel_separation_;
+    exactIntegration(linear_change, angular_change_);
 
     return true;
 }
 
 void diff_drive::Odometry::RungeKutta2(double dx_centroid, double dphi_centroid)
 {
-    double direction = heading_ + dphi_centroid * 0.5;
+    double direction = heading_ /*+ dphi_centroid * 0.5*/;
     x_ += dx_centroid * cos(direction);
     y_ += dx_centroid * sin(direction);
     heading_ += dphi_centroid;
@@ -63,7 +64,7 @@ void diff_drive::Odometry::RungeKutta2(double dx_centroid, double dphi_centroid)
 
 void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_centroid)
 {
-    if (fabs(dphi_centroid) < 1e-6)
+    if (fabs(dphi_centroid) < 15)
     {
         RungeKutta2(dx_centroid, dphi_centroid);
     }
@@ -98,6 +99,11 @@ double diff_drive::Odometry::getX() const
 double diff_drive::Odometry::getY() const
 {
     return y_;
+}
+
+double diff_drive::Odometry::getAngularSpeed() const
+{
+    return angular_change_;
 }
 
 std::pair<double, double> diff_drive::Odometry::ticksToMeters(short left_encoder, short right_encoder)

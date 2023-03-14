@@ -18,7 +18,7 @@ void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const di
 
 }
 
-std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double& xr, const double& yr, const double& fir)
+std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double xr, const double yr, const double fir)
 {
     std::vector<diff_drive::Point<int>> points;
     diff_drive::Point<int> point;
@@ -121,7 +121,7 @@ void diff_drive::Map::print_map()
     {
         for(int x = 0;x < map_size_x_; x++)
         {
-            std::cout << map_[x][y];
+            std::cout << map_[x][y] << " ";
         }
         std::cout << std::endl;
     }
@@ -130,6 +130,3 @@ void diff_drive::Map::print_map()
     std::cout << std::endl << std::endl;
 }
 
-double diff_drive::Map::deg2rad(double degrees){
-    return degrees * (M_PI/180);
-}

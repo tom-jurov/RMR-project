@@ -50,7 +50,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     Point<double> sol_pt2{};
 
     Point<double> goal_pt{};
-    for (std::size_t i = starting_index; i<path_.size(); ++i)
+    for (std::size_t i = starting_index; i<path_.size() - 1; ++i)
     {
         x1 = path_[i].x - current_state_.x;
         y1 = path_[i].y - current_state_.y;
@@ -137,7 +137,6 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     if ( last_found_index_ == path_.size()-1)
     {
         double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
-        std::cout << distance_to_go << std::endl;
         if ( distance_to_go < treshold_)
         {
             if (distance_to_go < 0.02)
