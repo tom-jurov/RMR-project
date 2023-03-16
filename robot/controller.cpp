@@ -50,7 +50,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     Point<double> sol_pt2{};
 
     Point<double> goal_pt{};
-    for (std::size_t i = starting_index; i<path_.size(); ++i)
+    for (std::size_t i = starting_index; i<path_.size() - 1; ++i)
     {
         x1 = path_[i].x - current_state_.x;
         y1 = path_[i].y - current_state_.y;

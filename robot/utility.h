@@ -22,6 +22,10 @@ namespace diff_drive{
     {
         return sqrt((pt2.x - pt1.x)*(pt2.x - pt1.x) + (pt2.y - pt1.y)*(pt2.y - pt1.y));
     }
+
+    static double deg2rad(double degrees){
+        return degrees * (M_PI/180);
+    }
 }
 
 #endif // UTILITY_H
