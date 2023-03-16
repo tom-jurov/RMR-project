@@ -12,13 +12,13 @@ void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const di
 {
     std::vector<diff_drive::Point<int>> new_points(laser_measurement.numberOfScans);
 
-    new_points = get_new_points(laser_measurement, odom.getX(), odom.getY(), odom.getHeading());
-    resize_map(new_points);
-    fill_map(new_points);
-
+    new_points = getNewPoints(laser_measurement, odom.getX(), odom.getY());
+    resizeMap(new_points);
+    fillMap(new_points);
+    std::cout << gyro_angle_ << std::endl;
 }
 
-std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserMeasurement& laser_measurement, const double xr, const double yr, const double fir)
+std::vector<diff_drive::Point<int>> diff_drive::Map::getNewPoints(const LaserMeasurement& laser_measurement, const double xr, const double yr)
 {
     std::vector<diff_drive::Point<int>> points;
     diff_drive::Point<int> point;
@@ -29,8 +29,8 @@ std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserM
 
         // xr, yr [m], laser distance [mm]
         if((laser_dis > 150 && laser_dis < 650) || (laser_dis > 700 && laser_dis < 2700)){
-            point.x = (int)((xr*1000 + laser_dis*cos(fir + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
-            point.y = (int)((yr*1000 + laser_dis*sin(fir + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
+            point.x = (int)((xr*1000 + laser_dis*cos(gyro_angle_ + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
+            point.y = (int)((yr*1000 + laser_dis*sin(gyro_angle_ + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
             points.emplace_back(point);
         }
     }
@@ -38,7 +38,7 @@ std::vector<diff_drive::Point<int>> diff_drive::Map::get_new_points(const LaserM
     return points;
 }
 
-void diff_drive::Map::resize_map(const std::vector<diff_drive::Point<int>>& new_points)
+void diff_drive::Map::resizeMap(const std::vector<diff_drive::Point<int>>& new_points)
 {
     for(int i = 0; i < new_points.size(); i++)
     {
@@ -101,7 +101,7 @@ void diff_drive::Map::resize_map(const std::vector<diff_drive::Point<int>>& new_
     }
 }
 
-void diff_drive::Map::fill_map(const std::vector<diff_drive::Point<int>>& new_points)
+void diff_drive::Map::fillMap(const std::vector<diff_drive::Point<int>>& new_points)
 {
     int x, y;
 
@@ -115,7 +115,7 @@ void diff_drive::Map::fill_map(const std::vector<diff_drive::Point<int>>& new_po
     map_[0 + zero_offset_x_][0 + zero_offset_y_] = 3; // Dont forget to delete later !!!!
 }
 
-void diff_drive::Map::print_map()
+void diff_drive::Map::printMap()
 {
     for(int y = map_size_y_ - 1; y >= 0; y--)
     {
@@ -128,5 +128,15 @@ void diff_drive::Map::print_map()
     std::cout << "Mx:" << map_size_x_ << " , My:" << map_size_y_;
     std::cout << " , Ox:" << zero_offset_x_ << " , Oy:" << zero_offset_y_;
     std::cout << std::endl << std::endl;
+}
+
+void diff_drive::Map::setGyroAngle(int angle)
+{
+    gyro_angle_ = deg2rad((angle/100.0)) - gyro_start_angle_;
+}
+
+void diff_drive::Map::setGyroStartAngle(int angle)
+{
+    gyro_start_angle_ = deg2rad((angle/100.0));
 }
 

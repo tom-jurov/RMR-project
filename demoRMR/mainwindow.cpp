@@ -102,6 +102,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     if(first_cycle_)
     {
         odom.setInitState(robotdata.EncoderLeft, robotdata.EncoderRight);
+        map.setGyroStartAngle(robotdata.GyroAngle);
         first_cycle_ = false;
     }
 
@@ -109,7 +110,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
     ///teraz tu posielam rychlosti na zaklade toho co setne joystick a vypisujeme data z robota(kazdy 5ty krat. ale mozete skusit aj castejsie). vyratajte si polohu. a vypiste spravnu
     /// tuto joystick cast mozete vklude vymazat,alebo znasilnit na vas regulator alebo ake mate pohnutky
-
 
 //    if(forwardspeed==0 && rotationspeed!=0)
 //        robot.setRotationSpeed(rotationspeed);
@@ -122,6 +122,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
     odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
+    map.setGyroAngle(robotdata.GyroAngle);
     if (start_)
     {
         controller.setCurrentPosition(odom);
@@ -265,7 +266,7 @@ void MainWindow::on_pushButton_10_clicked()
 
 void MainWindow::on_pushButton_11_clicked()
 {
-    map.print_map();
+    map.printMap();
 }
 
 void MainWindow::on_pushButton_clicked()
