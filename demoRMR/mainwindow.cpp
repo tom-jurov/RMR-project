@@ -274,15 +274,14 @@ void MainWindow::on_pushButton_12_clicked()
     map_loader loader;
     loader.load_map("priestor.txt", map);
     auto occupancy_map = loader.createMap(map);
-    for (std::size_t y = 0; y<115; ++y)
-    {
-        for (std::size_t x = 0; x<115; ++x)
-        {
-            std::cout << occupancy_map[x][114-y];
-        }
-        std::cout << std::endl;
-    }
     auto bloated_occupancy_map = loader.createBloatedMap();
+    diff_drive::GlobalNav global_nav(bloated_occupancy_map, 0, 0, 451.8, 339.11);
+    global_nav.floodFill();
+    auto path = global_nav.getPath();
+    for (const auto& p : path)
+    {
+        bloated_occupancy_map[p.x][p.y] = 3;
+    }
     for (std::size_t y = 0; y<115; ++y)
     {
         for (std::size_t x = 0; x<115; ++x)

@@ -212,6 +212,6 @@ map_loader::map_loader()
                 bloated_map[cell.x][cell.y-j] = 1;
             }
         }
-    }
+    } // 66 47.7707
     return bloated_map;
  }

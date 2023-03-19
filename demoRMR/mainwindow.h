@@ -29,6 +29,7 @@
 #include "controller.h"
 #include "map.h"
 #include "map_loader.h"
+#include "global_nav.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -94,6 +95,7 @@ private:
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
      diff_drive::Map map;
+     std::vector<diff_drive::Point<double>> path_;
      QTimer *timer;
 
      QJoysticks *instance;

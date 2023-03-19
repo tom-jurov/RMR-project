@@ -76,6 +76,7 @@ INCLUDEPATH += /usr/local/include/opencv4/
 SOURCES += \
     CKobuki.cpp \
     controller.cpp \
+    global_nav.cpp \
     map.cpp \
     map_loader.cpp \
     odometry.cpp \
@@ -85,6 +86,7 @@ SOURCES += \
 HEADERS += \
     CKobuki.h \
     controller.h \
+    global_nav.h \
     map.h \
     map_loader.h \
     odometry.h \
