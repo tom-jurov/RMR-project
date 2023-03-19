@@ -5,6 +5,8 @@ diff_drive::GlobalNav::GlobalNav(const std::vector<std::vector<int>>& map, doubl
     , visited_(std::vector<std::vector<bool>>(115, std::vector<bool>(115,false)))
     , start_({static_cast<int>((s_x+X_OFFSET)/GRID_SIZE),static_cast<int>((s_y+Y_OFFSET))/GRID_SIZE})
     , goal_({static_cast<int>((g_x+X_OFFSET)/GRID_SIZE),static_cast<int>((g_y+Y_OFFSET))/GRID_SIZE})
+    , g_x_(g_x)
+    , g_y_(g_y)
 {
 }
 
@@ -45,17 +47,16 @@ void diff_drive::GlobalNav::floodFill()
 
 std::vector<diff_drive::Point<int> > diff_drive::GlobalNav::getPath()
 {
-    std::vector<Point<int>> path;
     if (!visited_[goal_.x][goal_.y])
     {
-        return path;
+        return path_;
     }
 
     Point<int> p = goal_;
     int cost = map_[goal_.x][goal_.y];
     while (p.x != start_.x || p.y != start_.y)
     {
-        path.push_back(p);
+        path_.push_back(p);
 
         std::vector<Point<int>> neighbors = {
             {p.x+1, p.y}, {p.x-1, p.y},
@@ -76,9 +77,39 @@ std::vector<diff_drive::Point<int> > diff_drive::GlobalNav::getPath()
         }
         p = next;
     }
-    path.push_back(start_);
-    std::reverse(path.begin(), path.end());
-    return path;
+    path_.push_back(start_);
+    std::reverse(path_.begin(), path_.end());
+    return path_;
+}
+
+std::vector<diff_drive::Point<double> > diff_drive::GlobalNav::generateWaypoints()
+{
+    auto local_path = path_;
+    local_path.pop_back();
+    local_path.erase( local_path.begin());
+    waypoints_.push_back(Point<double>{0,0});
+    for (const auto& p :  local_path)
+    {
+       diff_drive::Point<double> way_point;
+       if (p.x == 10 && p.y != 10)
+       {
+            way_point.x = (p.x * diff_drive::GlobalNav::GRID_SIZE - diff_drive::GlobalNav::X_OFFSET) / 100;
+            way_point.y = (p.y * diff_drive::GlobalNav::GRID_SIZE - (double)diff_drive::GlobalNav::GRID_SIZE/2 - diff_drive::GlobalNav::Y_OFFSET) / 100;
+       }
+       else if (p.y == 10 && p.x != 10)
+       {
+            way_point.x = (p.x * diff_drive::GlobalNav::GRID_SIZE - (double)diff_drive::GlobalNav::GRID_SIZE/2 - diff_drive::GlobalNav::X_OFFSET) / 100;
+            way_point.y = (p.y * diff_drive::GlobalNav::GRID_SIZE - diff_drive::GlobalNav::Y_OFFSET) / 100;
+       }
+       else
+       {
+           way_point.x = (p.x * diff_drive::GlobalNav::GRID_SIZE - (double)diff_drive::GlobalNav::GRID_SIZE/2 - diff_drive::GlobalNav::X_OFFSET) / 100;
+           way_point.y = (p.y * diff_drive::GlobalNav::GRID_SIZE - (double)diff_drive::GlobalNav::GRID_SIZE/2 - diff_drive::GlobalNav::Y_OFFSET) / 100;
+       }
+        waypoints_.push_back(way_point);
+    }
+    waypoints_.push_back(diff_drive::Point<double>{g_x_/100, g_y_/100});
+    return  waypoints_;
 }
 
 

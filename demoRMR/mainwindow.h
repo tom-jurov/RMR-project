@@ -95,7 +95,7 @@ private:
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
      diff_drive::Map map;
-     std::vector<diff_drive::Point<double>> path_;
+     diff_drive::GlobalNav global_nav;
      QTimer *timer;
 
      QJoysticks *instance;
