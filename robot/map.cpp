@@ -15,7 +15,6 @@ void diff_drive::Map::update(const LaserMeasurement& laser_measurement, const di
     new_points = getNewPoints(laser_measurement, odom.getX(), odom.getY());
     resizeMap(new_points);
     fillMap(new_points);
-    std::cout << gyro_angle_ << std::endl;
 }
 
 std::vector<diff_drive::Point<int>> diff_drive::Map::getNewPoints(const LaserMeasurement& laser_measurement, const double xr, const double yr)

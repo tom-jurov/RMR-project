@@ -7,7 +7,7 @@ diff_drive::Controller::Controller()
 ,   last_found_index_(0)
 ,   linear_velocity_(0)
 ,   goal_velocity_(400)
-,   treshold_(0.5)
+,   treshold_(0.3)
 {
 }
 
@@ -133,24 +133,20 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     {
         turn_error = -1 * sgn(turn_error) * (2*M_PI - fabs(turn_error));
     }
-
-    if ( last_found_index_ == path_.size()-1)
+    double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
+    if (distance_to_go < treshold_)
     {
-        double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
-        if ( distance_to_go < treshold_)
+        if (distance_to_go < 0.05)
         {
-            if (distance_to_go < 0.02)
-            {
-                linear_velocity_ = 0;
-                last_found_index_ = 0;
-                current_state_ = Robot{0,0,0};
-                return {0,0};
-            }
-            int speed_down = linear_velocity_/treshold_*distance_to_go;
-            int local_look_ahead = look_ahead_dist_/treshold_*distance_to_go;
-            double r = 1000*local_look_ahead/(2*sin(turn_error));
-            return {speed_down,static_cast<int>(r)};
+            linear_velocity_ = 0;
+            last_found_index_ = 0;
+            current_state_ = Robot{0,0,0};
+            return {0,0};
         }
+        int speed_down = 0.5*linear_velocity_/treshold_*distance_to_go;
+        int local_look_ahead = look_ahead_dist_/treshold_*distance_to_go;
+        double r = 1000*local_look_ahead/(2*sin(turn_error));
+        return {speed_down,static_cast<int>(r)};
     }
     if (linear_velocity_ < goal_velocity_)
         linear_velocity_ += static_cast<int>(goal_velocity_/40);

@@ -193,7 +193,7 @@ map_loader::map_loader()
     for (const auto& cell : obstacle_cells_)
     {
         bloated_map[cell.x][cell.y] = 1;
-        for (int j=1; j<5; j++)
+        for (int j=1; j<6; j++)
         {
             if (!(cell.x + j > 114))
             {

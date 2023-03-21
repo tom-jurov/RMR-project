@@ -2,7 +2,6 @@
 #define UTILITY_H
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <iostream>
 
 namespace diff_drive{
     template<class T>
