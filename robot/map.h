@@ -15,16 +15,20 @@ namespace diff_drive
         Map();
         ~Map() = default;
         void update(const LaserMeasurement& laser_measurement, const diff_drive::Odometry& odom);
-        void print_map();
+        void printMap();
+        void setGyroAngle(int angle);
+        void setGyroStartAngle(int angle);
     private:
-        std::vector<diff_drive::Point<int>> get_new_points(const LaserMeasurement& laser_measurement, const double xr, const double yr, const double fir);
-        void resize_map(const std::vector<diff_drive::Point<int>>& new_points);
-        void fill_map(const std::vector<diff_drive::Point<int>>& new_points);
+        std::vector<diff_drive::Point<int>> getNewPoints(const LaserMeasurement& laser_measurement, const double xr, const double yr);
+        void resizeMap(const std::vector<diff_drive::Point<int>>& new_points);
+        void fillMap(const std::vector<diff_drive::Point<int>>& new_points);
     private:
         int map_size_x_;
         int map_size_y_;
         int zero_offset_x_; // offset for x = 0 in map_
         int zero_offset_y_; // offset for y = 0 in map_
+        double gyro_angle_;
+        double gyro_start_angle_;
         std::vector<std::vector<int>> map_;
     };
 }
