@@ -4,8 +4,10 @@
 #include <utility.h>
 #include <queue>
 #include <algorithm>
+#include "robot.h"
+
 namespace diff_drive{
-    class GlobalNav
+    class ROBOT_EXPORT GlobalNav
     {
     public:
         static constexpr int ROW = 115;

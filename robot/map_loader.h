@@ -1,6 +1,7 @@
 #ifndef MAP_LOADER_H
 #define MAP_LOADER_H
 #include <vector>
+#include "robot.h"
 
 typedef struct
 {
@@ -34,12 +35,12 @@ struct ObstacleCells
     int y;
 };
 
-class map_loader
+class ROBOT_EXPORT map_loader
 {
 static constexpr int GRID_SIZE = 5;
 public:
     map_loader();
-    void load_map(char *filename,TMapArea &mapss);
+    void load_map(const char *filename,TMapArea &mapss);
     std::vector<std::vector<int>> createMap(const TMapArea& map);
     std::vector<std::vector<int>> createBloatedMap();
 private:
