@@ -6,7 +6,7 @@ diff_drive::Controller::Controller()
 ,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
 ,   linear_velocity_(0)
-,   goal_velocity_(200)
+,   goal_velocity_(400)
 ,   treshold_(0.5)
 {
 }

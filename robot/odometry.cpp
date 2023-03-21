@@ -15,32 +15,8 @@ diff_drive::Odometry::Odometry()
 bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, const unsigned short right_wheel_current_pos)
 {
     short left_diff, right_diff;
-
-    if (left_wheel_old_pos_ - left_wheel_current_pos > (USHRT_MAX+1)/2)
-    {
-        left_diff = left_wheel_current_pos - left_wheel_old_pos_ + USHRT_MAX;
-    }
-    else if (left_wheel_current_pos - left_wheel_old_pos_> (USHRT_MAX+1)/2)
-    {
-        left_diff = left_wheel_current_pos - left_wheel_old_pos_ - USHRT_MAX;
-    }
-    else
-    {
-        left_diff = left_wheel_current_pos - left_wheel_old_pos_;
-    }
-
-    if (right_wheel_old_pos_ - right_wheel_current_pos > (USHRT_MAX+1)/2)
-    {
-        right_diff = right_wheel_current_pos - right_wheel_old_pos_ + USHRT_MAX;
-    }
-    else if (right_wheel_current_pos - right_wheel_old_pos_ > (USHRT_MAX+1)/2)
-    {
-        right_diff = right_wheel_current_pos - right_wheel_old_pos_ - USHRT_MAX;
-    }
-    else
-    {
-        right_diff = right_wheel_current_pos - right_wheel_old_pos_;
-    }
+    left_diff = left_wheel_current_pos - left_wheel_old_pos_;
+    right_diff = right_wheel_current_pos - right_wheel_old_pos_;
 
     auto [dleft_wheel_pos, dright_wheel_pos] = ticksToMeters(left_diff, right_diff);
 
@@ -54,19 +30,18 @@ bool diff_drive::Odometry::update(const unsigned short left_wheel_current_pos, c
     return true;
 }
 
-void diff_drive::Odometry::RungeKutta2(double dx_centroid, double dphi_centroid)
+void diff_drive::Odometry::forwardEuler(double dx_centroid, double dphi_centroid)
 {
-    double direction = heading_ /*+ dphi_centroid * 0.5*/;
-    x_ += dx_centroid * cos(direction);
-    y_ += dx_centroid * sin(direction);
+    x_ += dx_centroid * cos(heading_);
+    y_ += dx_centroid * sin(heading_);
     heading_ += dphi_centroid;
 }
 
 void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_centroid)
 {
-    if (fabs(dphi_centroid) < 15)
+    if (fabs(dphi_centroid) == 0)
     {
-        RungeKutta2(dx_centroid, dphi_centroid);
+        forwardEuler(dx_centroid, dphi_centroid);
     }
     else
     {
@@ -76,19 +51,11 @@ void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_cent
         x_ += r*(sin(heading_) - sin(heading_old));
         y_ += -r*(cos(heading_) - cos(heading_old));
     }
-    if (heading_ > 2*M_PI)
-    {
-        heading_ = heading_ - 2*M_PI;
-    }
-    if (heading_ < 0)
-    {
-        heading_ = 2*M_PI - heading_;
-    }
 }
 
 double diff_drive::Odometry::getHeading() const
 {
-    return heading_;
+    return wrapAngle(heading_);
 }
 
 double diff_drive::Odometry::getX() const
