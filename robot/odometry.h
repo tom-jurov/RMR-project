@@ -3,7 +3,7 @@
 #include <iostream>
 #include "robot_global.h"
 #define TICK_TO_METER 0.000085292090497737556558
-#define M_PI 3.14159265359
+#include <utility.h>
 namespace diff_drive
 {
     /*struct Point {
@@ -28,7 +28,7 @@ namespace diff_drive
         void setHeading(double value);
 
     private:
-        void RungeKutta2(double dx_centroid, double dphi_centroid);
+        void forwardEuler(double dx_centroid, double dphi_centroid);
         void exactIntegration(double dx_centroid, double dphi_centroid);
 
     private:

@@ -1,6 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <iostream>
 
 namespace diff_drive{
     template<class T>
@@ -25,6 +27,11 @@ namespace diff_drive{
 
     static double deg2rad(double degrees){
         return degrees * (M_PI/180);
+    }
+
+    inline double wrapAngle(double angle)
+    {
+        return angle - 2*M_PI * floor(angle / (2*M_PI));
     }
 }
 
