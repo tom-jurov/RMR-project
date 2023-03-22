@@ -255,10 +255,6 @@ void MainWindow::on_pushButton_8_clicked() //reset
 void MainWindow::on_pushButton_10_clicked()
 {
     auto waypoints = global_nav.generateWaypoints();
-    for (const auto& p : waypoints)
-    {
-        std::cout << p.x << " " << p.y << std::endl;
-    }
     controller.setPath(waypoints);
     start_ = true;
 }

@@ -25,7 +25,7 @@ namespace diff_drive{
         std::vector<std::vector<int>> map_;
         std::vector<std::vector<bool>> visited_;
         std::vector<Point<int>> path_;
-        std::vector<diff_drive::Point<double>> waypoints_;
+        std::vector<Point<double>> waypoints_;
         Point<int> start_;
         Point<int> goal_;
         double g_x_;

@@ -25,14 +25,12 @@ map_loader::map_loader()
      //tu nacitame obvodovu stenu
      char myLine[550];
      fgets(myLine,550,fp);
-     printf("%s\n",myLine);
      char *myCopy=(char*)calloc(strlen(myLine)+2,sizeof(char));
      memcpy(myCopy,myLine,sizeof(char)*strlen(myLine));
      char *freeMyCopy;
      freeMyCopy=myCopy;
      myCopy=strtok(myCopy,"[]");
      mapss.wall.numofpoints=(atoi(myCopy));
-      printf("num of points %i\n",mapss.wall.numofpoints);
       mapss.wall.points.reserve(mapss.wall.numofpoints);
       for(int i=0;i<mapss.wall.numofpoints;i++)
       {
@@ -52,7 +50,6 @@ map_loader::map_loader()
         mapss.obstacle.clear();
       while( fgets(myLine,550,fp))
       {
-          printf("%s\n",myLine);
           myCopy=(char*)calloc(strlen(myLine)+2,sizeof(char));
           memcpy(myCopy,myLine,sizeof(char)*strlen(myLine));
 
