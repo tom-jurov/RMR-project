@@ -225,8 +225,39 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_11">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>162</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Print map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_12">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>162</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Load map</string>
         </property>
        </widget>
       </item>
@@ -326,7 +357,7 @@
      <x>0</x>
      <y>0</y>
      <width>804</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -76,7 +76,9 @@ INCLUDEPATH += /usr/local/include/opencv4/
 SOURCES += \
     CKobuki.cpp \
     controller.cpp \
+    global_nav.cpp \
     map.cpp \
+    map_loader.cpp \
     odometry.cpp \
     robot.cpp \
     rplidar.cpp
@@ -84,7 +86,9 @@ SOURCES += \
 HEADERS += \
     CKobuki.h \
     controller.h \
+    global_nav.h \
     map.h \
+    map_loader.h \
     odometry.h \
     robot_global.h \
     robot.h \
@@ -97,3 +101,6 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    priestor.txt

@@ -28,6 +28,8 @@
 #include "odometry.h"
 #include "controller.h"
 #include "map.h"
+#include "map_loader.h"
+#include "global_nav.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -74,6 +76,8 @@ private slots:
 
     void on_pushButton_11_clicked();
 
+    void on_pushButton_12_clicked();
+
     void on_pushButton_clicked();
     void getNewFrame();
 
@@ -91,6 +95,7 @@ private:
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
      diff_drive::Map map;
+     diff_drive::GlobalNav global_nav;
      QTimer *timer;
 
      QJoysticks *instance;

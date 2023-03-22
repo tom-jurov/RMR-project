@@ -201,13 +201,6 @@ void MainWindow::on_pushButton_9_clicked() //start button
     ///ked je vsetko nasetovane tak to tento prikaz spusti (ak nieco nieje setnute,tak to normalne nenastavi.cize ak napr nechcete kameru,vklude vsetky info o nej vymazte)
     robot.robotStart();
     odom.setWheelSeparation(0.23);
-    std::vector<diff_drive::Point<double>> path;
-    path.push_back(diff_drive::Point<double>{0,0});
-    path.push_back(diff_drive::Point<double>{0.0525,3.17});
-    path.push_back(diff_drive::Point<double>{2.427,3.17});
-    path.push_back(diff_drive::Point<double>{3.327,0.297});
-    controller.setPath(path);
-
     //ziskanie joystickov
     instance = QJoysticks::getInstance();
 
@@ -261,12 +254,48 @@ void MainWindow::on_pushButton_8_clicked() //reset
 
 void MainWindow::on_pushButton_10_clicked()
 {
+    auto waypoints = global_nav.generateWaypoints();
+    controller.setPath(waypoints);
     start_ = true;
 }
 
 void MainWindow::on_pushButton_11_clicked()
 {
     map.printMap();
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    TMapArea map;
+    map_loader loader;
+    loader.load_map("C:/Dev/build-demoRMR-Desktop_Qt_5_15_2_MSVC2015_64bit-Debug/demoRMR/debug/priestor.txt", map);
+    auto occupancy_map = loader.createMap(map);
+    auto bloated_occupancy_map = loader.createBloatedMap();
+    double goal_x = 451.8;
+    double goal_y = 339.11;
+    global_nav = diff_drive::GlobalNav(bloated_occupancy_map, 0, 0, goal_x, goal_y);
+    global_nav.floodFill();
+    /*for (std::size_t y = 0; y<115; ++y)
+    {
+        for (std::size_t x = 0; x<115; ++x)
+        {
+            std::cout << occupancy_map[x][114-y];
+        }
+        std::cout << std::endl;
+    }*/
+    auto path = global_nav.getPath();
+    for (const auto& p : path)
+    {
+        bloated_occupancy_map[p.x][p.y] = 3;
+    }
+    /*for (std::size_t y = 0; y<115; ++y)
+    {
+        for (std::size_t x = 0; x<115; ++x)
+        {
+            std::cout << bloated_occupancy_map[x][114-y];
+        }
+        std::cout << std::endl;
+    }*/
 }
 
 void MainWindow::on_pushButton_clicked()

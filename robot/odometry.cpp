@@ -51,11 +51,12 @@ void diff_drive::Odometry::exactIntegration(double dx_centroid, double dphi_cent
         x_ += r*(sin(heading_) - sin(heading_old));
         y_ += -r*(cos(heading_) - cos(heading_old));
     }
+    heading_ = wrapAngle(heading_);
 }
 
 double diff_drive::Odometry::getHeading() const
 {
-    return wrapAngle(heading_);
+    return heading_;
 }
 
 double diff_drive::Odometry::getX() const

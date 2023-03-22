@@ -2,6 +2,7 @@
 #define ODOMETRY_H
 #include <iostream>
 #include "robot_global.h"
+#include "utility.h"
 #define TICK_TO_METER 0.000085292090497737556558
 #include <utility.h>
 namespace diff_drive

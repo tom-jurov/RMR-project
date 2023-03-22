@@ -2,7 +2,6 @@
 #define UTILITY_H
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <iostream>
 
 namespace diff_drive{
     template<class T>
@@ -10,9 +9,9 @@ namespace diff_drive{
         T x, y;
     };
 
-    static int sgn(int num)
+    static constexpr inline int sgn(int num)
     {
-        if (num>=0)
+        if (num >= 0)
         {
             return 1;
         }
@@ -20,16 +19,16 @@ namespace diff_drive{
     }
 
     template<class T>
-    static double magnitude(const Point<T> &pt1, const Point<T> &pt2)
+    static constexpr inline double magnitude(const Point<T> &pt1, const Point<T> &pt2)
     {
         return sqrt((pt2.x - pt1.x)*(pt2.x - pt1.x) + (pt2.y - pt1.y)*(pt2.y - pt1.y));
     }
 
-    static double deg2rad(double degrees){
+    static constexpr inline double deg2rad(double degrees){
         return degrees * (M_PI/180);
     }
 
-    inline double wrapAngle(double angle)
+    static inline double wrapAngle(double angle)
     {
         return angle - 2*M_PI * floor(angle / (2*M_PI));
     }

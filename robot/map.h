@@ -5,7 +5,6 @@
 #include "robot_global.h"
 #include <vector>
 #include "utility.h"
-#define GRID_RESOLUTION 50 // [mm]
 
 namespace diff_drive
 {
@@ -22,6 +21,8 @@ namespace diff_drive
         std::vector<diff_drive::Point<int>> getNewPoints(const LaserMeasurement& laser_measurement, const double xr, const double yr);
         void resizeMap(const std::vector<diff_drive::Point<int>>& new_points);
         void fillMap(const std::vector<diff_drive::Point<int>>& new_points);
+    private:
+        static constexpr int GRID_RESOLUTION = 50; // [mm]
     private:
         int map_size_x_;
         int map_size_y_;
