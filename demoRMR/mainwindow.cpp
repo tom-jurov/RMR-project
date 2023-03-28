@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 1
+#define SIM 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #if SIM
     ipaddress="127.0.0.1";
 #else
-    ipaddress="192.168.1.15";
+    ipaddress="192.168.1.14";
 #endif
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
@@ -268,7 +268,7 @@ void MainWindow::on_pushButton_12_clicked()
 {
     TMapArea map;
     map_loader loader;
-    loader.load_map("C:/Dev/build-demoRMR-Desktop_Qt_5_15_2_MSVC2015_64bit-Debug/demoRMR/debug/priestor.txt", map);
+    loader.load_map("priestor.txt", map);
     auto occupancy_map = loader.createMap(map);
     auto bloated_occupancy_map = loader.createBloatedMap();
     double goal_x = 451.8;
