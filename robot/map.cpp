@@ -27,7 +27,7 @@ std::vector<diff_drive::Point<int>> diff_drive::Map::getNewPoints(const LaserMea
         double laser_dis = laser_measurement.Data[i].scanDistance;
 
         // xr, yr [m], laser distance [mm]
-        if((laser_dis > 150 && laser_dis < 650) || (laser_dis > 700 && laser_dis < 2700)){
+        if((laser_dis > 150 && laser_dis < 630) || (laser_dis > 700 && laser_dis < 2700)){
             point.x = (int)((xr*1000 + laser_dis*cos(gyro_angle_ + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
             point.y = (int)((yr*1000 + laser_dis*sin(gyro_angle_ + deg2rad(-laser_measurement.Data[i].scanAngle)))/GRID_RESOLUTION);
             points.emplace_back(point);
