@@ -77,6 +77,7 @@ SOURCES += \
     CKobuki.cpp \
     controller.cpp \
     global_nav.cpp \
+    local_nav.cpp \
     map.cpp \
     map_loader.cpp \
     odometry.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     CKobuki.h \
     controller.h \
     global_nav.h \
+    local_nav.h \
     map.h \
     map_loader.h \
     odometry.h \
