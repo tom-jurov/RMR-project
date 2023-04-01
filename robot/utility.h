@@ -9,6 +9,10 @@ namespace diff_drive{
         T x, y;
     };
 
+    struct Robot {
+        double x, y, heading;
+    };
+
     static constexpr inline int sgn(int num)
     {
         if (num >= 0)

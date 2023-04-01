@@ -5,9 +5,6 @@
 #include <vector>
 #include "utility.h"
 namespace diff_drive{
-    struct Robot {
-        double x, y, heading;
-    };
     struct CTRL_Output{
         int speed, radius;
     };
