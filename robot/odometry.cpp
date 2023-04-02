@@ -69,6 +69,11 @@ double diff_drive::Odometry::getY() const
     return y_;
 }
 
+const diff_drive::Robot diff_drive::Odometry::getRobotState() const
+{
+    return {x_, y_, heading_};
+}
+
 double diff_drive::Odometry::getAngularSpeed() const
 {
     return angular_change_;

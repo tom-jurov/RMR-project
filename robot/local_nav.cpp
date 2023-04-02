@@ -42,19 +42,18 @@ diff_drive::LocalNav::processLidar(const LaserMeasurement& laser_measurement, co
     std::vector<diff_drive::Point<double>> lidar_data;
     lidar_data.reserve(laser_measurement.numberOfScans);
     diff_drive::Point<double> point;
-
     for(int i = 0; i < laser_measurement.numberOfScans; i++)
     {
         double laser_dis = laser_measurement.Data[i].scanDistance / 1000;
-
         // xr, yr [m], laser distance [mm]
-        if((laser_dis > 150 && laser_dis < 650) || (laser_dis > 700 && laser_dis < 2700)){
+        if(((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && ((laser_measurement.Data[i].scanAngle) < 45 || laser_measurement.Data[i].scanAngle > 315 ))
+        {
             point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
             point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
-            lidar_data.emplace_back(point);
+            if (!(point.x < 0 || point.y < 0))
+                lidar_data.emplace_back(point);
         }
     }
-
     return lidar_data;
 }
 
