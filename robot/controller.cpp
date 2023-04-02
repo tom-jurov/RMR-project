@@ -134,7 +134,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         turn_error = -1 * sgn(turn_error) * (2*M_PI - fabs(turn_error));
     }
     double distance_to_go = magnitude(path_.back(), reinterpret_cast<Point<double>&>(current_state_));
-    if (distance_to_go < treshold_)
+    /*if (distance_to_go < treshold_)
     {
         if (distance_to_go < 0.05)
         {
@@ -147,7 +147,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         int local_look_ahead = look_ahead_dist_/treshold_*distance_to_go;
         double r = 1000*local_look_ahead/(2*sin(turn_error));
         return {speed_down,static_cast<int>(r)};
-    }
+    }*/
     if (linear_velocity_ < goal_velocity_)
         linear_velocity_ += static_cast<int>(goal_velocity_/40);
     double r = 1000*look_ahead_dist_/(2*sin(turn_error));
