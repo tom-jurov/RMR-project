@@ -99,12 +99,16 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 /// vola sa vzdy ked dojdu nove data z robota. nemusite nic riesit, proste sa to stane
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-    auto way = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData,0.5);
-    for (const auto& p : way)
+    if (copyOfLaserData.numberOfScans != 0)
     {
-        std::cout << p.x << " " << p.y << std::endl;
+        auto way = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData,0.5);
+        controller.setPath(way);
+        for (const auto& p : way)
+        {
+            std::cout << p.x << " " << p.y << std::endl;
+        }
     }
-    controller.setPath(way);
+
     if(first_cycle_)
     {
         odom.setInitState(robotdata.EncoderLeft, robotdata.EncoderRight);
