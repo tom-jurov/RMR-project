@@ -99,7 +99,7 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 /// vola sa vzdy ked dojdu nove data z robota. nemusite nic riesit, proste sa to stane
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-    auto way = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData,0.03);
+    auto way = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData,0.5);
     for (const auto& p : way)
     {
         std::cout << p.x << " " << p.y << std::endl;
@@ -161,8 +161,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 /// vola sa ked dojdu nove data z lidaru
 int MainWindow::processThisLidar(LaserMeasurement laserData)
 {
-
-
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
