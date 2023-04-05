@@ -99,6 +99,7 @@ private:
      diff_drive::Map map;
      diff_drive::LocalNav local_nav;
      diff_drive::GlobalNav global_nav;
+     std::vector<diff_drive::Point<double>> way_;
      QTimer *timer;
 
      QJoysticks *instance;

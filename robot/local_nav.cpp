@@ -4,67 +4,58 @@ diff_drive::LocalNav::LocalNav()
 {
 }
 
-diff_drive::Point<double> diff_drive::LocalNav::getNormalVector(const Point<double> &lidar_pos, const Point<double> &lidar_consequent_pos)
-{
-    double dx = lidar_consequent_pos.x - lidar_pos.x;
-    double dy = lidar_consequent_pos.y - lidar_pos.y;
-    double length = sqrt(pow(dx, 2) + pow(dy, 2));
-    Point<double> normal;
-    //std::cout << "Lidar data: " << lidar_pos.x << " " << lidar_pos.y << " " << lidar_consequent_pos.x << " " << lidar_consequent_pos.y << std::endl;
-    if (lidar_consequent_pos.x > lidar_pos.x || lidar_consequent_pos.y > lidar_pos.y)
-    {
-        normal.x = -dy / length;
-        normal.y = dx / length;
-    }
-    else
-    {
-        normal.x = dy / length;
-        normal.y = -dx / length;
-    }
-    return normal;
-}
-
 std::vector<diff_drive::Point<double> >
-diff_drive::LocalNav::generateWaypoints(const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement, double wall_distance)
+diff_drive::LocalNav::generateWaypoints(const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement)
 {
-    std::vector<Point<double>> lidar_data = std::move(processLidar(laser_measurement, robot_pos));
+    Point<double> target_point = std::move(findTargetPoint(laser_measurement, robot_pos));
     std::vector<Point<double>> waypoints;
-
-    for (int i = 0; i < lidar_data.size()-1; i++)
-    {
-        Point<double> normal = getNormalVector(lidar_data[i], lidar_data[i+1]);
-        Point<double> scaled_normal;
-        scaled_normal.x = normal.x * wall_distance;
-        scaled_normal.y = normal.y * wall_distance;
-
-        Point<double> waypoint;
-        waypoint.x = lidar_data[i].x + scaled_normal.x;
-        waypoint.y = lidar_data[i].y + scaled_normal.y;
-        //std::cout << "Way point: " << waypoint.x << " " << waypoint.y;
-
-        waypoints.emplace_back(std::move(waypoint));
-    }
+    waypoints.emplace_back(Point<double>{robot_pos.x, robot_pos.y});
+    waypoints.emplace_back(std::move(target_point));
     return waypoints;
 }
 
-std::vector<diff_drive::Point<double>>
-diff_drive::LocalNav::processLidar(const LaserMeasurement& laser_measurement, const diff_drive::Robot &robot_pos)
+diff_drive::Point<double>
+diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement, const diff_drive::Robot &robot_pos)
 {
-    std::vector<diff_drive::Point<double>> lidar_data;
-    lidar_data.reserve(laser_measurement.numberOfScans);
-    diff_drive::Point<double> point;
+    diff_drive::Point<double> nearest_point;
+    double nearest_distance = 2.700;
+    double angle = 0;
     for(int i = 0; i < laser_measurement.numberOfScans; i++)
     {
         double laser_dis = laser_measurement.Data[i].scanDistance / 1000;
         // xr, yr [m], laser distance [mm]
-        if (((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && (laser_measurement.Data[i].scanAngle >= 45 && laser_measurement.Data[i].scanAngle <= 135))
+        if (((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && (laser_measurement.Data[i].scanAngle > 0 && laser_measurement.Data[i].scanAngle < 180))
         {
-            point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
-            point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
-            //std::cout << point.x << " " << point.y << " " << laser_measurement.Data[i].scanAngle <<std::endl;
-            lidar_data.emplace_back(point);
+            if (laser_dis < nearest_distance) {
+                nearest_point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                nearest_point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                angle = deg2rad(-laser_measurement.Data[i].scanAngle);
+                nearest_distance = laser_dis;
+            }
         }
     }
-    return lidar_data;
+    Point<double> d_vector = {nearest_point.x - robot_pos.x, nearest_point.y - robot_pos.y};
+    Point<double> n_vector = {-d_vector.y, d_vector.x};
+    double norm = std::sqrt(std::pow(n_vector.x, 2) + std::pow(n_vector.y, 2));
+    n_vector = {n_vector.x/norm, n_vector.y/norm};
+    if (fabs(n_vector.x) > fabs(n_vector.y))
+    {
+        if (sgn(n_vector.x) > 0)
+        {
+            n_vector = {0.3*n_vector.x, n_vector.y+desired_distance_};
+        }
+        else
+        {
+            n_vector = {0.3*n_vector.x, n_vector.y-desired_distance_};
+        }
+        std::cout << n_vector.x << " " << n_vector.y << " " << angle <<std::endl;
+    }
+    else
+    {
+        n_vector = {n_vector.x-desired_distance_, 0.3*n_vector.y};
+    }
+    Point<double> target_point = {nearest_point.x + n_vector.x, nearest_point.y + n_vector.y};
+
+    return target_point;
 }
 
