@@ -24,10 +24,10 @@ diff_drive::Point<double> diff_drive::LocalNav::getNormalVector(const Point<doub
     return normal;
 }
 
-std::vector<diff_drive::Point<double> >
+std::vector<diff_drive::Point<double>>
 diff_drive::LocalNav::generateWaypoints(const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement, double wall_distance)
 {
-    std::vector<Point<double>> lidar_data = std::move(processLidar(laser_measurement, robot_pos));
+    std::vector<Point<double>> lidar_data = processLidar(laser_measurement, robot_pos);
     std::vector<Point<double>> waypoints;
 
     for (int i = 0; i < lidar_data.size()-1; i++)
@@ -68,3 +68,29 @@ diff_drive::LocalNav::processLidar(const LaserMeasurement& laser_measurement, co
     return lidar_data;
 }
 
+bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement)
+{
+    double robot_goal_angle = wrapAngle(atan2((goal.y - robot_pos.y),(goal.x - robot_pos.x)) - robot_pos.heading);
+    double robot_goal_distance = sqrt(pow(goal.y - robot_pos.y,2) + pow(goal.x - robot_pos.x,2));
+    double laser_normalized_angle, laser_normalized_dis;
+    double laser_dis_crit, laser_dis;
+    double safe_zone = 0.2;
+
+    for(int i = 0; i < laser_measurement.numberOfScans; i++)
+    {
+        laser_dis = laser_measurement.Data[i].scanDistance / 1000;
+        if ((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700))
+        {
+            laser_normalized_angle = wrapAngle(robot_goal_angle + deg2rad(laser_measurement.Data[i].scanAngle));
+            laser_dis_crit = fabs(safe_zone/sin(laser_normalized_angle));
+            laser_normalized_dis = fabs(laser_dis*cos(laser_normalized_angle));
+
+            if((laser_dis < laser_dis_crit) && (laser_normalized_dis < robot_goal_distance) && ((laser_normalized_angle < 0.5*M_PI) || (laser_normalized_angle > 1.5*M_PI)))
+            {
+                 return false;
+            }
+        }
+    }
+
+    return true;
+}

@@ -10,6 +10,7 @@ namespace diff_drive{
     public:
         LocalNav();
         std::vector<Point<double>> generateWaypoints(const Robot &robot_pos, const LaserMeasurement& laser_measurement, double wall_distance);
+        bool isPathClear(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement);
     private:
          Point<double> getNormalVector(const Point<double>& lidar_pos, const Point<double>& lidar_consequent_pos);
          std::vector<Point<double>> processLidar(const LaserMeasurement& laser_measurement, const Robot &robot_pos);

@@ -105,8 +105,14 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         controller.setPath(way);
         for (const auto& p : way)
         {
-            std::cout << p.x << " " << p.y << std::endl;
+           // std::cout << p.x << " " << p.y << std::endl;
         }
+        diff_drive::Point<double> point;
+        bool obstacle;
+        point.x = 2.15;
+        point.y = 3.40;
+        obstacle = local_nav.isPathClear(point ,odom.getRobotState(), copyOfLaserData);
+        std::cout << obstacle << std::endl;
     }
 
     if(first_cycle_)
