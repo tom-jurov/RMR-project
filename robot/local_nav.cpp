@@ -1,5 +1,5 @@
 #include "local_nav.h"
-
+#define EPS 5e-3
 diff_drive::LocalNav::LocalNav()
 {
 }
@@ -20,13 +20,14 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
     diff_drive::Point<double> nearest_point;
     double nearest_distance = 2.700;
     double angle = 0;
-    for(int i = 0; i < laser_measurement.numberOfScans; i++)
+    for(int i = laser_measurement.numberOfScans - 1; i > -1; i--)
     {
         double laser_dis = laser_measurement.Data[i].scanDistance / 1000;
         // xr, yr [m], laser distance [mm]
         if (((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && (laser_measurement.Data[i].scanAngle > 0 && laser_measurement.Data[i].scanAngle < 180))
         {
-            if (laser_dis < nearest_distance) {
+            if (laser_dis + EPS < nearest_distance) {
+
                 nearest_point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
                 nearest_point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
                 angle = deg2rad(-laser_measurement.Data[i].scanAngle);
@@ -40,7 +41,7 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
     n_vector = {n_vector.x/norm, n_vector.y/norm};
     if (fabs(n_vector.x) > fabs(n_vector.y))
     {
-        if (sgn(n_vector.x) > 0)
+        if (n_vector.x > 0)
         {
             n_vector = {0.3*n_vector.x, n_vector.y+desired_distance_};
         }
@@ -48,11 +49,19 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
         {
             n_vector = {0.3*n_vector.x, n_vector.y-desired_distance_};
         }
-        std::cout << n_vector.x << " " << n_vector.y << " " << angle <<std::endl;
+        std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance <<std::endl;
     }
     else
     {
-        n_vector = {n_vector.x-desired_distance_, 0.3*n_vector.y};
+        if (n_vector.y > 0)
+        {
+            n_vector = {n_vector.x-desired_distance_, 0.3*n_vector.y};
+        }
+        else
+        {
+            n_vector = {n_vector.x+desired_distance_, 0.3*n_vector.y};
+        }
+        std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance << std::endl;
     }
     Point<double> target_point = {nearest_point.x + n_vector.x, nearest_point.y + n_vector.y};
 
