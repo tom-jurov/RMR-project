@@ -23,7 +23,7 @@ void diff_drive::Controller::setPath(const std::vector<Point<double>> &path)
 
 diff_drive::CTRL_Output diff_drive::Controller::controlStep()
 {
-    bool intersection_found = false;
+   /* bool intersection_found = false;
     int starting_index = last_found_index_;
 
     double x1 = 0;
@@ -118,7 +118,8 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
             intersection_found = false;
             goal_pt = {path_[last_found_index_].x, path_[last_found_index_].y};
         }
-    }
+    }*/
+    diff_drive::Point<double> goal_pt = path_[1];
 
     double target_angle = atan2( (goal_pt.y - current_state_.y), (goal_pt.x - current_state_.x) );
 
@@ -148,8 +149,10 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         double r = 1000*local_look_ahead/(2*sin(turn_error));
         return {speed_down,static_cast<int>(r)};
     }*/
+
     if (linear_velocity_ < goal_velocity_)
         linear_velocity_ += static_cast<int>(goal_velocity_/40);
     double r = 1000*look_ahead_dist_/(2*sin(turn_error));
+    std::cout << goal_pt.x << " " << goal_pt.y << " " << r/1000 << std::endl;
     return {linear_velocity_, static_cast<int>(r)};
 }

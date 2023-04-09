@@ -49,7 +49,7 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
         {
             n_vector = {0.3*n_vector.x, n_vector.y-desired_distance_};
         }
-        std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance <<std::endl;
+        //std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance <<std::endl;
     }
     else
     {
@@ -61,7 +61,7 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
         {
             n_vector = {n_vector.x+desired_distance_, 0.3*n_vector.y};
         }
-        std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance << std::endl;
+        //std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance << std::endl;
     }
     Point<double> target_point = {nearest_point.x + n_vector.x, nearest_point.y + n_vector.y};
 
