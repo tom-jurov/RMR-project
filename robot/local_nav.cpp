@@ -68,13 +68,12 @@ diff_drive::LocalNav::processLidar(const LaserMeasurement& laser_measurement, co
     return lidar_data;
 }
 
-bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement)
+bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement, double safe_zone)
 {
     double robot_goal_angle = wrapAngle(atan2((goal.y - robot_pos.y),(goal.x - robot_pos.x)) - robot_pos.heading);
     double robot_goal_distance = sqrt(pow(goal.y - robot_pos.y,2) + pow(goal.x - robot_pos.x,2));
     double laser_normalized_angle, laser_normalized_dis;
     double laser_dis_crit, laser_dis;
-    double safe_zone = 0.2;
 
     for(int i = 0; i < laser_measurement.numberOfScans; i++)
     {
@@ -93,4 +92,45 @@ bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_dri
     }
 
     return true;
+}
+
+std::vector<diff_drive::Point<double>>
+diff_drive::LocalNav::findObstacleEdges(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, double safe_zone)
+{
+    int last_read_index = 0;
+    double laser_dis, laser_angle;
+    double last_laser_dis = laser_measurement.Data[0].scanDistance/1000;
+    double last_laser_angle = deg2rad(laser_measurement.Data[0].scanAngle);
+    std::vector<diff_drive::Point<double>> points;
+    diff_drive::Point<double> point;
+
+    for(int i = 1; i < laser_measurement.numberOfScans; i++)
+    {
+        laser_dis = laser_measurement.Data[i].scanDistance/1000;
+        laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
+        double dis_diff = fabs(laser_dis - last_laser_dis);
+        double ang_diff = fabs(laser_angle - last_laser_angle);
+
+        if ((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.7))
+        {
+            if(fabs(laser_dis - last_laser_dis) > 0.4 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6))
+            {
+                point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
+                point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
+                points.emplace_back(point);
+                //std::cout << point.x << " , " << point.y << "   ";
+                point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                points.emplace_back(point);
+                //std::cout << point.x << " , " << point.y << "   ";
+            }
+
+            last_laser_dis = laser_dis;
+            last_laser_angle = laser_angle;
+            last_read_index = i;
+        }
+    }
+
+    //std::cout << std::endl;
+    return points;
 }

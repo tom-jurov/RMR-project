@@ -76,10 +76,25 @@ void MainWindow::paintEvent(QPaintEvent *event)
             for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
             {
                 int dist=copyOfLaserData.Data[k].scanDistance/20; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazenia
-                int xp=rect.width()-(rect.width()/2+dist*2*sin((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
-                int yp=rect.height()-(rect.height()/2+dist*2*cos((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
+                int xp=rect.width()-(rect.width()/2+dist*2*sin((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
+                int yp=rect.height()-(rect.height()/2+dist*2*cos((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
                 if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
                     painter.drawEllipse(QPoint(xp, yp),2,2);
+            }
+
+
+            if(edges.size() > 0)
+            {
+                pero.setWidth(6);//hrubka pera -3pixely
+                pero.setColor(Qt::red);//farba je zelena
+                painter.setPen(pero);
+                for(int i=0; i < edges.size(); i++)
+                {
+                    int xp=rect.width()-(rect.width()/2 + 100*(edges[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(edges[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+                    int yp=rect.height()-(rect.height()/2 + 100*(edges[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(edges[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                        painter.drawEllipse(QPoint(xp, yp),2,2);
+                }
             }
         }
     }
@@ -111,8 +126,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         bool obstacle;
         point.x = 2.15;
         point.y = 3.40;
-        obstacle = local_nav.isPathClear(point ,odom.getRobotState(), copyOfLaserData);
-        std::cout << obstacle << std::endl;
+        obstacle = local_nav.isPathClear(point ,odom.getRobotState(), copyOfLaserData, 0.2);
+        edges = local_nav.findObstacleEdges(point ,odom.getRobotState(), copyOfLaserData, 0.2);
+        //std::cout << obstacle << std::endl;
     }
 
     if(first_cycle_)

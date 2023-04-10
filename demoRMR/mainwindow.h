@@ -100,6 +100,7 @@ private:
      diff_drive::LocalNav local_nav;
      diff_drive::GlobalNav global_nav;
      QTimer *timer;
+     std::vector<diff_drive::Point<double>> edges;
 
      QJoysticks *instance;
      bool first_cycle_ = true;
