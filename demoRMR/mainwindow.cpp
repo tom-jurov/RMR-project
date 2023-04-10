@@ -78,16 +78,26 @@ void MainWindow::paintEvent(QPaintEvent *event)
                 int xp=rect.width()-(rect.width()/2+dist*2*sin((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
                 int yp=rect.height()-(rect.height()/2+dist*2*cos((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
                 if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                    painter.drawEllipse(QPoint(xp, yp),2,2);
-                    if(way_.size()!=0)
+                    painter.drawEllipse(QPoint(xp, yp),2,2);       
+            }
+
+            if(way_.size() > 0)
+            {
+                pero.setWidth(6);//hrubka pera -3pixely
+                pero.setColor(Qt::red);//farba je zelena
+                painter.setPen(pero);
+                for(int i=0; i < way_.size(); i++)
+                {
+                    int xp=rect.width()-(rect.width()/2 + 100*(way_[1].x - odom.getX())*sin(-odom.getHeading()) + 100*(way_[1].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+                    int yp=rect.height()-(rect.height()/2 + 100*(way_[1].x - odom.getX())*cos(-odom.getHeading()) - 100*(way_[1].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+                    int rx=rect.width()-(rect.width()/2) + rect.topLeft().x();
+                    int ry=rect.height()-(rect.height()/2) + rect.topLeft().y();
+                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
                     {
-                        int xk=rect.width()-(rect.width()/2)+odom.getY()*100-way_[1].y*100+rect.topLeft().x();
-                        int yk=rect.height()-(rect.height()/2)+odom.getX()*100-way_[1].x*100+rect.topLeft().y();
-                        int xj=rect.width()-(rect.width()/2)+rect.topLeft().x();
-                        int yj=rect.height()-(rect.height()/2)+rect.topLeft().y();
-                        painter.drawEllipse(QPoint(xk, yk),10,10);
-                        painter.drawEllipse(QPoint(xj, yj),10,10);
+                        painter.drawEllipse(QPoint(xp, yp),2,2);
+                        painter.drawEllipse(QPoint(rx, ry),10,10);
                     }
+                }
             }
         }
     }
