@@ -82,6 +82,14 @@ void MainWindow::paintEvent(QPaintEvent *event)
                     painter.drawEllipse(QPoint(xp, yp),2,2);
             }
 
+            pero.setWidth(3);//hrubka pera -3pixely
+            painter.setBrush(QBrush());
+            pero.setColor(Qt::yellow);//farba je zelena
+            painter.setPen(pero);
+            int xp=rect.width()-rect.width()/2+rect.topLeft().x(); //prepocet do obrazovky
+            int yp=rect.height()-rect.height()/2+rect.topLeft().y();//prepocet do obrazovky
+            if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                painter.drawEllipse(QPoint(xp, yp),270,270);
 
             if(edges.size() > 0)
             {
@@ -96,6 +104,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
                         painter.drawEllipse(QPoint(xp, yp),2,2);
                 }
             }
+
         }
     }
 }
