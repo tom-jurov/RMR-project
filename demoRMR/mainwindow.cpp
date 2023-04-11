@@ -57,7 +57,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
     rect= ui->frame->geometry();//ziskate porametre stvorca,do ktoreho chcete kreslit
     rect.translate(0,15);
     painter.drawRect(rect);
-
     if(useCamera1==true && actIndex>-1)/// ak zobrazujem data z kamery a aspon niektory frame vo vectore je naplneny
     {
         std::cout<<actIndex<<std::endl;
@@ -79,7 +78,26 @@ void MainWindow::paintEvent(QPaintEvent *event)
                 int xp=rect.width()-(rect.width()/2+dist*2*sin((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
                 int yp=rect.height()-(rect.height()/2+dist*2*cos((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
                 if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                    painter.drawEllipse(QPoint(xp, yp),2,2);
+                    painter.drawEllipse(QPoint(xp, yp),2,2);       
+            }
+
+            if(way_.size() > 0)
+            {
+                pero.setWidth(6);//hrubka pera -3pixely
+                pero.setColor(Qt::blue);//farba je zelena
+                painter.setPen(pero);
+                for(int i=0; i < way_.size(); i++)
+                {
+                    int xp=rect.width()-(rect.width()/2 + 100*(way_[1].x - odom.getX())*sin(-odom.getHeading()) + 100*(way_[1].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+                    int yp=rect.height()-(rect.height()/2 + 100*(way_[1].x - odom.getX())*cos(-odom.getHeading()) - 100*(way_[1].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+                    int rx=rect.width()-(rect.width()/2) + rect.topLeft().x();
+                    int ry=rect.height()-(rect.height()/2) + rect.topLeft().y();
+                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                    {
+                        painter.drawEllipse(QPoint(xp, yp),2,2);
+                        painter.drawEllipse(QPoint(rx, ry),10,10);
+                    }
+                }
             }
 
             pero.setWidth(3);//hrubka pera -3pixely
@@ -125,9 +143,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if (copyOfLaserData.numberOfScans != 0)
     {
-        auto way = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData,0.5);
-        controller.setPath(way);
-        for (const auto& p : way)
+        way_ = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData);
+        controller.setPath(way_);
+        for (const auto& p : way_)
         {
            // std::cout << p.x << " " << p.y << std::endl;
         }
