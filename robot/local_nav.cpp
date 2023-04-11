@@ -97,67 +97,75 @@ bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_dri
 std::vector<diff_drive::Point<double>>
 diff_drive::LocalNav::findObstacleEdges(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, double safe_zone)
 {
-    int last_read_index = 0;
+    int last_read_index = 0, first_valid_index = 0;
     double laser_dis, last_laser_dis ;
     double last_laser_angle, laser_angle ;
     bool first_valid_reading = true;
-    bool reading = false;
-    bool last_reading = false;
+    bool validity_of_reading = false;
+    bool validity_of_last_reading = false;
+    bool stop_flag = false;
+    bool next_cycle = false;
     std::vector<diff_drive::Point<double>> points;
     diff_drive::Point<double> point;
 
-    for(int i = 1; i < laser_measurement.numberOfScans; i++)
+    for(int i = 0; i < laser_measurement.numberOfScans && stop_flag == false; i++)
     {
         laser_dis = laser_measurement.Data[i].scanDistance/1000;
         laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
-        //double dis_diff = fabs(laser_dis - last_laser_dis);
-        //double ang_diff = fabs(laser_angle - last_laser_angle);
 
-        if (laser_dis < 2.7)
+        if (laser_dis > 0.150 && laser_dis < 2.7)
         {
-            reading = true;
-            last_reading = reading;
+            validity_of_reading = true;
+            validity_of_last_reading = validity_of_reading;
 
-            if((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700))
+            if(first_valid_reading)
             {
-                if(first_valid_reading)
-                {
-                    last_laser_dis = laser_measurement.Data[i].scanDistance/1000;
-                    last_laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
-                    first_valid_reading = false;
-                }
-
-                if(fabs(laser_dis - last_laser_dis) > 0.25 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6.28))
-                {
-                    point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
-                    point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
-                    points.emplace_back(point);
-
-                    point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
-                    point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
-                    points.emplace_back(point);
-                }
-
-                last_laser_dis = laser_dis;
-                last_laser_angle = laser_angle;
-                last_read_index = i;
+                last_laser_dis = laser_measurement.Data[i].scanDistance/1000;
+                last_laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
+                first_valid_reading = false;
+                first_valid_index = i;
             }
+
+            if(fabs(laser_dis - last_laser_dis) > 0.25 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6.28))
+            {
+                point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
+                point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
+                points.emplace_back(point);
+
+                point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
+                points.emplace_back(point);
+            }
+
+            last_laser_dis = laser_dis;
+            last_laser_angle = laser_angle;
+            last_read_index = i;
         }
         else
         {
-            reading = false;
+            validity_of_reading = false;
         }
 
-        if(last_reading != reading)
+        if(validity_of_last_reading != validity_of_reading)
         {
             point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
             point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
             points.emplace_back(point);
-            last_reading = reading;
+            validity_of_last_reading = validity_of_reading;
+        }
+
+        if(i == laser_measurement.numberOfScans - 1)
+        {
+           i = 0;
+           next_cycle = true;
+        }
+
+        if(i == first_valid_index && next_cycle == true)
+        {
+            stop_flag = true;
         }
 
     }
 
-    //std::cout << std::endl;
     return points;
 }
