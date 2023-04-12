@@ -74,7 +74,7 @@ bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_dri
 }
 
 std::vector<diff_drive::Point<double>>
-diff_drive::LocalNav::findObstacleEdges(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, double safe_zone)
+diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasurement& laser_measurement)
 {
     int last_read_index = 0, first_valid_index = 0;
     double laser_dis, last_laser_dis ;
@@ -144,6 +144,29 @@ diff_drive::LocalNav::findObstacleEdges(const Point<double>& goal, const Robot &
             stop_flag = true;
         }
 
+    }
+
+    return points;
+}
+
+std::vector<diff_drive::Point<double>>
+diff_drive::LocalNav::findEdgeNormals(const Point<double>& goal, const Robot &robot_pos, const std::vector<Point<double>>& edges, double safe_zone)
+{
+    diff_drive::Point<double> d_vector_norm;
+    diff_drive::Point<double> n_vector_norm;
+    diff_drive::Point<double> d_vector;
+    diff_drive::Point<double> n_vector;
+    std::vector<diff_drive::Point<double>> points;
+    diff_drive::Point<double> point;
+
+    for(int i = 0; i < edges.size(); i++)
+    {
+        d_vector = {edges[i].x - robot_pos.x, edges[i].y - robot_pos.y};
+        n_vector = {-d_vector.y, d_vector.x};
+        d_vector_norm = diff_drive::normalized(d_vector);
+        n_vector_norm = diff_drive::normalized(n_vector);
+        point = edges[i] + safe_zone*n_vector_norm;
+        points.emplace_back(point);
     }
 
     return points;

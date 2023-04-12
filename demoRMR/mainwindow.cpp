@@ -123,6 +123,20 @@ void MainWindow::paintEvent(QPaintEvent *event)
                 }
             }
 
+            if(normals.size() > 0)
+            {
+                pero.setWidth(6);//hrubka pera -3pixely
+                pero.setColor(Qt::yellow);//farba je zelena
+                painter.setPen(pero);
+                for(int i=0; i < normals.size(); i++)
+                {
+                    int xp=rect.width()-(rect.width()/2 + 100*(normals[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(normals[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+                    int yp=rect.height()-(rect.height()/2 + 100*(normals[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(normals[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                        painter.drawEllipse(QPoint(xp, yp),2,2);
+                }
+            }
+
         }
     }
 }
@@ -154,7 +168,8 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         point.x = 2.15;
         point.y = 3.40;
         obstacle = local_nav.isPathClear(point ,odom.getRobotState(), copyOfLaserData, 0.2);
-        edges = local_nav.findObstacleEdges(point ,odom.getRobotState(), copyOfLaserData, 0.2);
+        edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
+        normals = local_nav.findEdgeNormals(point, odom.getRobotState(), edges, 0.3);
         //std::cout << obstacle << std::endl;
     }
 
