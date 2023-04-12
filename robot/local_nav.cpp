@@ -36,34 +36,13 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
         }
     }
     Point<double> d_vector = {nearest_point.x - robot_pos.x, nearest_point.y - robot_pos.y};
-    Point<double> n_vector = {-d_vector.y, d_vector.x};
-    double norm = std::sqrt(std::pow(n_vector.x, 2) + std::pow(n_vector.y, 2));
-    n_vector = {n_vector.x/norm, n_vector.y/norm};
-    if (fabs(n_vector.x) > fabs(n_vector.y))
-    {
-        if (n_vector.x > 0)
-        {
-            n_vector = {0.3*n_vector.x, n_vector.y+desired_distance_};
-        }
-        else
-        {
-            n_vector = {0.3*n_vector.x, n_vector.y-desired_distance_};
-        }
-        //std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance <<std::endl;
-    }
-    else
-    {
-        if (n_vector.y > 0)
-        {
-            n_vector = {n_vector.x-desired_distance_, 0.3*n_vector.y};
-        }
-        else
-        {
-            n_vector = {n_vector.x+desired_distance_, 0.3*n_vector.y};
-        }
-        //std::cout << n_vector.x << " " << n_vector.y << " " << angle << " " << nearest_distance << std::endl;
-    }
-    Point<double> target_point = {nearest_point.x + n_vector.x, nearest_point.y + n_vector.y};
+    Point<double> d_vector_normed = diff_drive::normalized(d_vector);
+    Point<double> n_vector_normed = {-d_vector_normed.y, d_vector_normed.x};
+    Point<double> scaled_d_vector = -desired_distance_*d_vector_normed;
+    Point<double> scaled_n_vector = 0.3*n_vector_normed;
+    Point<double> target_vec = scaled_d_vector + scaled_n_vector;
+
+    Point<double> target_point = {nearest_point.x + target_vec.x, nearest_point.y + target_vec.y};
 
     return target_point;
 }

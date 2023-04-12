@@ -23,7 +23,7 @@ void diff_drive::Controller::setPath(const std::vector<Point<double>> &path)
 
 diff_drive::CTRL_Output diff_drive::Controller::controlStep()
 {
-   /* bool intersection_found = false;
+    /*bool intersection_found = false;
     int starting_index = last_found_index_;
 
     double x1 = 0;
