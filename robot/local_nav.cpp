@@ -164,7 +164,7 @@ diff_drive::LocalNav::findEdgeNormals(const Robot &robot_pos, const std::vector<
     return points;
 }
 diff_drive::Point<double>
-diff_drive::LocalNav::findClosestAccesablePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals)
+diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals)
 {
     diff_drive::Point<double> point;
     diff_drive::Point<double> robot = {robot_pos.x,robot_pos.y};
@@ -185,6 +185,7 @@ diff_drive::LocalNav::findClosestAccesablePoint(const Point<double>& goal, const
             if(robot_to_goal_dis < smallest_dis)
             {
                 point = normals[i];
+                smallest_dis = robot_to_goal_dis;
             }
         }
     }

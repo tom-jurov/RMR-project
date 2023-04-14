@@ -179,7 +179,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         obstacle = local_nav.isPathClear(goal ,odom.getRobotState(), copyOfLaserData, 0.2);
         edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
         normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.3);
-        follwed_point = local_nav.findClosestAccesablePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
+        follwed_point = local_nav.findClosestAccessiblePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
         //std::cout << edges.size() << std::endl;
     }
 
