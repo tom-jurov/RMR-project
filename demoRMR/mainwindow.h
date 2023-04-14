@@ -103,6 +103,7 @@ private:
      QTimer *timer;
      std::vector<diff_drive::Point<double>> edges;
      std::vector<diff_drive::Point<double>> normals;
+     diff_drive::Point<double> follwed_point;
 
      QJoysticks *instance;
      bool first_cycle_ = true;

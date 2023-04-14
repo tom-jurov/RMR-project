@@ -107,7 +107,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
             int xp=rect.width()-rect.width()/2+rect.topLeft().x(); //prepocet do obrazovky
             int yp=rect.height()-rect.height()/2+rect.topLeft().y();//prepocet do obrazovky
             if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                painter.drawEllipse(QPoint(xp, yp),270,270);
+                painter.drawEllipse(QPoint(xp, yp),200,200);
 
             if(edges.size() > 0)
             {
@@ -137,6 +137,15 @@ void MainWindow::paintEvent(QPaintEvent *event)
                 }
             }
 
+            pero.setWidth(6);//hrubka pera -3pixely
+            painter.setBrush(QBrush());
+            pero.setColor(Qt::magenta);//farba je zelena
+            painter.setPen(pero);
+            xp=rect.width()-(rect.width()/2 + 100*(follwed_point.x - odom.getX())*sin(-odom.getHeading()) + 100*(follwed_point.y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+            yp=rect.height()-(rect.height()/2 + 100*(follwed_point.x - odom.getX())*cos(-odom.getHeading()) - 100*(follwed_point.y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+            if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                painter.drawEllipse(QPoint(xp, yp),2,2);
+
         }
     }
 }
@@ -163,14 +172,15 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         {
            // std::cout << p.x << " " << p.y << std::endl;
         }
-        diff_drive::Point<double> point;
+        diff_drive::Point<double> goal;
         bool obstacle;
-        point.x = 2.15;
-        point.y = 3.40;
-        obstacle = local_nav.isPathClear(point ,odom.getRobotState(), copyOfLaserData, 0.2);
+        goal.x = 2.15;
+        goal.y = 3.40;
+        obstacle = local_nav.isPathClear(goal ,odom.getRobotState(), copyOfLaserData, 0.2);
         edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
-        normals = local_nav.findEdgeNormals(point, odom.getRobotState(), edges, 0.3);
-        //std::cout << obstacle << std::endl;
+        normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.3);
+        follwed_point = local_nav.findClosestAccesablePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
+        //std::cout << edges.size() << std::endl;
     }
 
     if(first_cycle_)

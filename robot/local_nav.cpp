@@ -80,8 +80,6 @@ diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasu
     double laser_dis, last_laser_dis ;
     double last_laser_angle, laser_angle ;
     bool first_valid_reading = true;
-    bool validity_of_reading = false;
-    bool validity_of_last_reading = false;
     bool stop_flag = false;
     bool next_cycle = false;
     std::vector<diff_drive::Point<double>> points;
@@ -92,11 +90,8 @@ diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasu
         laser_dis = laser_measurement.Data[i].scanDistance/1000;
         laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
 
-        if (laser_dis > 0.150 && laser_dis < 2.7)
-        {
-            validity_of_reading = true;
-            validity_of_last_reading = validity_of_reading;
-
+        if (laser_dis > 0.150 && laser_dis < 2)
+        {            
             if(first_valid_reading)
             {
                 last_laser_dis = laser_measurement.Data[i].scanDistance/1000;
@@ -105,52 +100,41 @@ diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasu
                 first_valid_index = i;
             }
 
-            if(fabs(laser_dis - last_laser_dis) > 0.25 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6.28))
+            if(fabs(laser_dis - last_laser_dis) > 0.40 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6.28))
             {
                 point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
                 point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
                 points.emplace_back(point);
+                normals_switch_.emplace_back(true);
 
                 point.x = (robot_pos.x + laser_dis*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
                 point.y = (robot_pos.y + laser_dis*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[i].scanAngle)));
                 points.emplace_back(point);
+                normals_switch_.emplace_back(false);
             }
 
             last_laser_dis = laser_dis;
             last_laser_angle = laser_angle;
             last_read_index = i;
         }
-        else
-        {
-            validity_of_reading = false;
-        }
-
-        if(validity_of_last_reading != validity_of_reading)
-        {
-            point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
-            point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
-            points.emplace_back(point);
-            validity_of_last_reading = validity_of_reading;
-        }
 
         if(i == laser_measurement.numberOfScans - 1)
         {
-           i = 0;
-           next_cycle = true;
+            i = 0;
+            next_cycle = true;
         }
 
         if(i == first_valid_index && next_cycle == true)
         {
             stop_flag = true;
         }
-
     }
 
     return points;
 }
 
 std::vector<diff_drive::Point<double>>
-diff_drive::LocalNav::findEdgeNormals(const Point<double>& goal, const Robot &robot_pos, const std::vector<Point<double>>& edges, double safe_zone)
+diff_drive::LocalNav::findEdgeNormals(const Robot &robot_pos, const std::vector<Point<double>>& edges, double edge_dis)
 {
     diff_drive::Point<double> d_vector_norm;
     diff_drive::Point<double> n_vector_norm;
@@ -165,9 +149,45 @@ diff_drive::LocalNav::findEdgeNormals(const Point<double>& goal, const Robot &ro
         n_vector = {-d_vector.y, d_vector.x};
         d_vector_norm = diff_drive::normalized(d_vector);
         n_vector_norm = diff_drive::normalized(n_vector);
-        point = edges[i] + safe_zone*n_vector_norm;
+
+        if(normals_switch_[i] == true)
+        {
+            point = edges[i] + -edge_dis*n_vector_norm;
+        }
+        else
+        {
+           point = edges[i] + edge_dis*n_vector_norm;
+        }
         points.emplace_back(point);
     }
 
     return points;
+}
+diff_drive::Point<double>
+diff_drive::LocalNav::findClosestAccesablePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals)
+{
+    diff_drive::Point<double> point;
+    diff_drive::Point<double> robot = {robot_pos.x,robot_pos.y};
+    double robot_to_goal_dis, robot_to_normal_dis, normal_to_goal_dis;
+    double smallest_dis = 30000;
+    bool is_path_clear;
+
+    for(int i = 0; i < normals.size(); i++)
+    {
+        is_path_clear = isPathClear(normals[i], robot_pos, laser_measurement, 0.2);
+
+        if(is_path_clear)
+        {
+            robot_to_normal_dis = magnitude(robot,normals[i]);
+            normal_to_goal_dis = magnitude(normals[i],goal);
+            robot_to_goal_dis = robot_to_normal_dis + normal_to_goal_dis;
+
+            if(robot_to_goal_dis < smallest_dis)
+            {
+                point = normals[i];
+            }
+        }
+    }
+
+    return point;
 }
