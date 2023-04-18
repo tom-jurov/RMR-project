@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 1
+#define SIM 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #if SIM
     ipaddress="127.0.0.1";
 #else
-    ipaddress="192.168.1.14";
+    ipaddress="192.168.1.15";
 #endif
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
@@ -107,7 +107,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
             int xp=rect.width()-rect.width()/2+rect.topLeft().x(); //prepocet do obrazovky
             int yp=rect.height()-rect.height()/2+rect.topLeft().y();//prepocet do obrazovky
             if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                painter.drawEllipse(QPoint(xp, yp),200,200);
+                painter.drawEllipse(QPoint(xp, yp),270,270);
 
             if(edges.size() > 0)
             {
@@ -166,21 +166,15 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if (copyOfLaserData.numberOfScans != 0)
     {
-        way_ = local_nav.generateWaypoints(odom.getRobotState(),copyOfLaserData);
+        diff_drive::Point<double> goal = {3.84, 0.93};
+        controller.setGoal(goal);
+        way_ = local_nav.generateWaypoints(goal, odom.getRobotState(),copyOfLaserData);
         controller.setPath(way_);
         for (const auto& p : way_)
         {
            // std::cout << p.x << " " << p.y << std::endl;
         }
-        diff_drive::Point<double> goal;
-        bool obstacle;
-        goal.x = 2.15;
-        goal.y = 3.40;
-        obstacle = local_nav.isPathClear(goal ,odom.getRobotState(), copyOfLaserData, 0.2);
-        edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
-        normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.3);
-        follwed_point = local_nav.findClosestAccessiblePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
-        //std::cout << edges.size() << std::endl;
+
     }
 
     if(first_cycle_)

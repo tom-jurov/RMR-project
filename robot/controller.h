@@ -16,6 +16,7 @@ namespace diff_drive{
         ~Controller() = default;
         void setCurrentPosition(const diff_drive::Odometry& odom);
         void setPath(const std::vector<Point<double>>& path);
+        void setGoal(const diff_drive::Point<double>& goal);
         CTRL_Output controlStep();
 
     private:
@@ -26,6 +27,7 @@ namespace diff_drive{
         int linear_velocity_;
         double goal_velocity_;
         double treshold_;
+        diff_drive::Point<double> goal_;
     };
 }
 

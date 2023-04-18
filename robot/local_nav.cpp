@@ -5,12 +5,38 @@ diff_drive::LocalNav::LocalNav()
 }
 
 std::vector<diff_drive::Point<double> >
-diff_drive::LocalNav::generateWaypoints(const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement)
+diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_drive::Robot &robot_pos, const LaserMeasurement& laser_measurement)
 {
-    Point<double> target_point = std::move(findTargetPoint(laser_measurement, robot_pos));
     std::vector<Point<double>> waypoints;
+    Point<double> robot = {robot_pos.x, robot_pos.y};
+
     waypoints.emplace_back(Point<double>{robot_pos.x, robot_pos.y});
-    waypoints.emplace_back(std::move(target_point));
+
+    if(isPathClear(goal, robot_pos, laser_measurement, 0.2))
+    {
+        waypoints.emplace_back(goal);
+    }
+    else
+    {
+        auto edges = findObstacleEdges(robot_pos, laser_measurement);
+        auto normals = findEdgeNormals(robot_pos, edges, 0.4);
+        auto follwed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals);
+
+        if(first_edge_detected_)
+        {
+            temp_followed_point_ = follwed_point;
+            first_edge_detected_ = false;
+        }
+
+        if(magnitude(robot, temp_followed_point_) < 0.2)
+        {
+            temp_followed_point_ = follwed_point;
+        }
+
+        waypoints.emplace_back(temp_followed_point_);
+    }
+
+
     return waypoints;
 }
 
@@ -90,7 +116,7 @@ diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasu
         laser_dis = laser_measurement.Data[i].scanDistance/1000;
         laser_angle = deg2rad(laser_measurement.Data[i].scanAngle);
 
-        if (laser_dis > 0.150 && laser_dis < 2)
+        if (laser_dis > 0.150 && laser_dis < 2.7)
         {            
             if(first_valid_reading)
             {
@@ -100,7 +126,7 @@ diff_drive::LocalNav::findObstacleEdges(const Robot &robot_pos, const LaserMeasu
                 first_valid_index = i;
             }
 
-            if(fabs(laser_dis - last_laser_dis) > 0.40 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6.28))
+            if(fabs(laser_dis - last_laser_dis) > 0.40 || (fabs(laser_angle - last_laser_angle) > 0.25 && fabs(laser_angle - last_laser_angle) < 6))
             {
                 point.x = (robot_pos.x + laser_measurement.Data[last_read_index].scanDistance/1000*cos(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
                 point.y = (robot_pos.y + laser_measurement.Data[last_read_index].scanDistance/1000*sin(robot_pos.heading + deg2rad(-laser_measurement.Data[last_read_index].scanAngle)));
