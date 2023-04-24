@@ -9,7 +9,7 @@
 /// KED SA NAJBLIZSIE PUSTIS DO PRACE, SKONTROLUJ CI JE MIESTO TOHTO TEXTU TVOJ IDENTIFIKATOR
 /// AZ POTOM ZACNI ROBIT... AK TO NESPRAVIS, POJDU BODY DOLE... A NIE JEDEN,ALEBO DVA ALE BUDES RAD
 /// AK SA DOSTANES NA SKUSKU
-#define SIM 0
+#define SIM 1
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -166,15 +166,15 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if (copyOfLaserData.numberOfScans != 0)
     {
-        diff_drive::Point<double> goal = {3.84, 0.93};
+        //diff_drive::Point<double> goal = {3.84, 0.93};
+        diff_drive::Point<double> goal = {4.45, 1.83};
         controller.setGoal(goal);
         way_ = local_nav.generateWaypoints(goal, odom.getRobotState(),copyOfLaserData);
         controller.setPath(way_);
-        for (const auto& p : way_)
-        {
-           // std::cout << p.x << " " << p.y << std::endl;
-        }
 
+        edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
+        normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.4);
+        follwed_point = local_nav.findClosestAccessiblePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
     }
 
     if(first_cycle_)

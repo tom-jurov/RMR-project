@@ -142,7 +142,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     double distance_to_go = magnitude(goal_, reinterpret_cast<Point<double>&>(current_state_));
     if (distance_to_go < treshold_)
     {
-        if (distance_to_go < 0.05)
+        if (distance_to_go < 0.09)
         {
             linear_velocity_ = 0;
             last_found_index_ = 0;

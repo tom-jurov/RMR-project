@@ -19,7 +19,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
     else
     {
         auto edges = findObstacleEdges(robot_pos, laser_measurement);
-        auto normals = findEdgeNormals(robot_pos, edges, 0.4);
+        auto normals = findEdgeNormals(robot_pos, edges, 0.45);
         auto follwed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals);
 
         if(first_edge_detected_)
@@ -28,7 +28,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             first_edge_detected_ = false;
         }
 
-        if(magnitude(robot, temp_followed_point_) < 0.2)
+        if(magnitude(robot, temp_followed_point_) < 0.3)
         {
             temp_followed_point_ = follwed_point;
         }
@@ -89,7 +89,7 @@ bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_dri
             laser_dis_crit = fabs(safe_zone/sin(laser_normalized_angle));
             laser_normalized_dis = fabs(laser_dis*cos(laser_normalized_angle));
 
-            if((laser_dis < laser_dis_crit) && (laser_normalized_dis < robot_goal_distance) && ((laser_normalized_angle < 0.5*M_PI) || (laser_normalized_angle > 1.5*M_PI)))
+            if((laser_dis < laser_dis_crit) && ((laser_normalized_dis + 0.2) < robot_goal_distance) && ((laser_normalized_angle < 0.5*M_PI) || (laser_normalized_angle > 1.5*M_PI)))
             {
                  return false;
             }
