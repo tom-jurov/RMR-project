@@ -30,7 +30,19 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             first_edge_detected_ = false;
         }
 
-        if(magnitude(robot, temp_followed_point_) < 0.3)
+        if(current_heruistic_distance_ > smallest_heruistic_distance_)
+        {
+            // Wall follow
+            temp_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
+            is_wall_following_ = true;
+        }
+
+        if (magnitude(reinterpret_cast<const Point<double>&>(robot_pos),goal) < smallest_heruistic_distance_)
+        {
+            is_wall_following_ = false;
+        }
+
+        if(magnitude(robot, temp_followed_point_) < 0.3 && !is_wall_following_)
         {
             temp_followed_point_ = followed_point;
             current_heruistic_distance_ = getHeruisticDistance(followed_point, goal, robot_pos);
@@ -41,13 +53,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             }
         }
 
-        if(current_heruistic_distance_ > smallest_heruistic_distance_)
-        {
-            // Wall follow
-            temp_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
-        }
-
-        std::cout << smallest_heruistic_distance_ << "  " << current_heruistic_distance_ << std::endl;
+        //std::cout << smallest_heruistic_distance_ << "  " << current_heruistic_distance_ << std::endl;
 
         waypoints.emplace_back(temp_followed_point_);
     }
@@ -66,7 +72,7 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
     {
         double laser_dis = laser_measurement.Data[i].scanDistance / 1000;
         // xr, yr [m], laser distance [mm]
-        if (((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && (laser_measurement.Data[i].scanAngle > 0 && laser_measurement.Data[i].scanAngle < 180))
+        if (((laser_dis > 0.150 && laser_dis < 0.650) || (laser_dis > 0.700 && laser_dis < 2.700)) && (laser_measurement.Data[i].scanAngle > 180 && laser_measurement.Data[i].scanAngle < 360))
         {
             if (laser_dis + EPS < nearest_distance) {
 
@@ -79,7 +85,7 @@ diff_drive::LocalNav::findTargetPoint(const LaserMeasurement& laser_measurement,
     }
     Point<double> d_vector = {nearest_point.x - robot_pos.x, nearest_point.y - robot_pos.y};
     Point<double> d_vector_normed = diff_drive::normalized(d_vector);
-    Point<double> n_vector_normed = {-d_vector_normed.y, d_vector_normed.x};
+    Point<double> n_vector_normed = {d_vector_normed.y, -d_vector_normed.x};
     Point<double> scaled_d_vector = -desired_distance_*d_vector_normed;
     Point<double> scaled_n_vector = 0.3*n_vector_normed;
     Point<double> target_vec = scaled_d_vector + scaled_n_vector;

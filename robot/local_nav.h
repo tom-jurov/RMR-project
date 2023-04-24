@@ -25,6 +25,7 @@ namespace diff_drive{
         Point<double> temp_followed_point_;
         bool first_edge_detected_ = true;
         double smallest_heruistic_distance_, current_heruistic_distance_;
+        bool is_wall_following_ = false;
     };
 
 }
