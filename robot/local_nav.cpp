@@ -20,18 +20,34 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
     {
         auto edges = findObstacleEdges(robot_pos, laser_measurement);
         auto normals = findEdgeNormals(robot_pos, edges, 0.45);
-        auto follwed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals);
+        auto followed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals);
 
         if(first_edge_detected_)
         {
-            temp_followed_point_ = follwed_point;
+            temp_followed_point_ = followed_point;
+            smallest_heruistic_distance_ = getHeruisticDistance(followed_point, goal, robot_pos);
+            current_heruistic_distance_ = smallest_heruistic_distance_;
             first_edge_detected_ = false;
         }
 
         if(magnitude(robot, temp_followed_point_) < 0.3)
         {
-            temp_followed_point_ = follwed_point;
+            temp_followed_point_ = followed_point;
+            current_heruistic_distance_ = getHeruisticDistance(followed_point, goal, robot_pos);
+
+            if(current_heruistic_distance_ < smallest_heruistic_distance_)
+            {
+                smallest_heruistic_distance_ = current_heruistic_distance_;
+            }
         }
+
+        if(current_heruistic_distance_ > smallest_heruistic_distance_)
+        {
+            // Wall follow
+            temp_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
+        }
+
+        std::cout << smallest_heruistic_distance_ << "  " << current_heruistic_distance_ << std::endl;
 
         waypoints.emplace_back(temp_followed_point_);
     }
@@ -193,8 +209,7 @@ diff_drive::Point<double>
 diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals)
 {
     diff_drive::Point<double> point;
-    diff_drive::Point<double> robot = {robot_pos.x,robot_pos.y};
-    double robot_to_goal_dis, robot_to_normal_dis, normal_to_goal_dis;
+    double robot_to_goal_dis;
     double smallest_dis = 30000;
     bool is_path_clear;
 
@@ -204,9 +219,7 @@ diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, cons
 
         if(is_path_clear)
         {
-            robot_to_normal_dis = magnitude(robot,normals[i]);
-            normal_to_goal_dis = magnitude(normals[i],goal);
-            robot_to_goal_dis = robot_to_normal_dis + normal_to_goal_dis;
+            robot_to_goal_dis = getHeruisticDistance(normals[i],goal,robot_pos);
 
             if(robot_to_goal_dis < smallest_dis)
             {
@@ -217,4 +230,9 @@ diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, cons
     }
 
     return point;
+}
+
+double diff_drive::LocalNav::getHeruisticDistance(const Point<double> &normal, const Point<double> &goal, const Robot &robot_pos) const
+{
+    return  magnitude(reinterpret_cast<const Point<double>&>(robot_pos),normal) + magnitude(normal,goal);
 }

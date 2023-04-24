@@ -18,11 +18,13 @@ namespace diff_drive{
     private:
         std::vector<Point<double>> processLidar(const LaserMeasurement& laser_measurement, const Robot &robot_pos);
         Point<double> findTargetPoint(const LaserMeasurement& laser_measurement, const Robot &robot_pos);
+        double getHeruisticDistance(const Point<double> &normal, const Point<double> &goal, const Robot &robot_pos) const;
     private:
         std::vector<bool> normals_switch_;
         double desired_distance_ = 0.5;
         Point<double> temp_followed_point_;
         bool first_edge_detected_ = true;
+        double smallest_heruistic_distance_, current_heruistic_distance_;
     };
 
 }
