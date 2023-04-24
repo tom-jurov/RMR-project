@@ -14,6 +14,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
 
     if(isPathClear(goal, robot_pos, laser_measurement, 0.2))
     {
+        std::cout << "Straight to goal" << std::endl;
         waypoints.emplace_back(goal);
     }
     else
@@ -35,6 +36,12 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             // Wall follow
             temp_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
             is_wall_following_ = true;
+            std::cout << "Wall following" << std::endl;
+        }
+
+        if (!is_wall_following_)
+        {
+            std::cout << "STD BEHAVIOUR" << std::endl;
         }
 
         if (magnitude(reinterpret_cast<const Point<double>&>(robot_pos),goal) < smallest_heruistic_distance_)
