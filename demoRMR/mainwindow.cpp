@@ -167,18 +167,19 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     if (copyOfLaserData.numberOfScans != 0)
     {
         //Real
-        //diff_drive::Point<double> goal = {3.84, 0.93};
-        //diff_drive::Point<double> goal = {0, 3};
+        //goal_ = {3.84, 0.93};
+        //goal_ = {0, 3};
         //Sim
-        diff_drive::Point<double> goal = {4.45, 1.83};
-        //diff_drive::Point<double> goal = {4.45, 3.24};
-        controller.setGoal(goal);
-        way_ = local_nav.generateWaypoints(goal, odom.getRobotState(),copyOfLaserData);
+        //goal_ = {4.45, 1.83};
+        //goal_ = {4.45, 3.24};
+        int dummy;
+        controller.setGoal(goal_);
+        way_ = local_nav.generateWaypoints(goal_, odom.getRobotState(),copyOfLaserData);
         controller.setPath(way_);
 
         edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
         normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.4);
-        follwed_point = local_nav.findClosestAccessiblePoint(goal, odom.getRobotState(), copyOfLaserData, normals);
+        follwed_point = local_nav.findClosestAccessiblePoint(goal_, odom.getRobotState(), copyOfLaserData, normals, &dummy);
     }
 
     if(first_cycle_)
@@ -380,6 +381,11 @@ void MainWindow::on_pushButton_12_clicked()
 void MainWindow::on_pushButton_13_clicked()
 {
     start_ = true;
+}
+
+void MainWindow::on_pushButton_14_clicked()
+{
+    goal_ ={0.0 , 0.0 };
 }
 
 void MainWindow::on_pushButton_clicked()

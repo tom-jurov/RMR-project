@@ -1,5 +1,5 @@
 #include "local_nav.h"
-#define EPS 5e-3
+
 diff_drive::LocalNav::LocalNav()
 {
 }
@@ -19,51 +19,91 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
     }
     else
     {
+        int index;
         auto edges = findObstacleEdges(robot_pos, laser_measurement);
         auto normals = findEdgeNormals(robot_pos, edges, 0.45);
-        auto followed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals);
+        auto temp_followed_point = findClosestAccessiblePoint(goal, robot_pos, laser_measurement, normals, &index);
 
         if(first_edge_detected_)
         {
-            temp_followed_point_ = followed_point;
-            smallest_heruistic_distance_ = getHeruisticDistance(followed_point, goal, robot_pos);
+            current_followed_point_ = temp_followed_point;
+            last_followed_point_ = current_followed_point_;
+            smallest_heruistic_distance_ = getHeruisticDistance(temp_followed_point, goal, robot_pos);
             current_heruistic_distance_ = smallest_heruistic_distance_;
+            current_followed_edge_ = edges[index];
+            last_followed_edge_ = current_followed_edge_;
             first_edge_detected_ = false;
         }
 
-        if(current_heruistic_distance_ > smallest_heruistic_distance_)
+        // Wall following, followed until leaving condiotion satsfied
+        if(getHeruisticDistance(current_followed_point_, goal, robot_pos) > smallest_heruistic_distance_)
         {
-            // Wall follow
-            temp_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
+            auto first_vec = last_followed_edge_ + -1*reinterpret_cast<const Point<double>&>(robot_pos);
+            Point<double> second_vec = {sin(robot_pos.heading), cos(robot_pos.heading)};
+            double dot_product = first_vec.x * second_vec.x + first_vec.y * second_vec.y;
+            double mult_mag = norm(first_vec) * norm(second_vec);
+            double angle_of_vec = std::acos(dot_product/mult_mag);
+            //std::cout << angle_of_vec << std::endl;
+
+            if(is_wall_following_ == false)
+            {
+                if (angle_of_vec > 0 && angle_of_vec < M_PI/2)
+                {
+                    direction_wall_following_flag_ = RIGHT;
+                }
+                else
+                {
+                    direction_wall_following_flag_ = LEFT;
+                }
+            }
+
             is_wall_following_ = true;
-            std::cout << "Wall following" << std::endl;
         }
 
-        if (!is_wall_following_)
-        {
-            std::cout << "STD BEHAVIOUR" << std::endl;
-        }
-
-        if (magnitude(reinterpret_cast<const Point<double>&>(robot_pos),goal) < smallest_heruistic_distance_)
+        // Leaving condition
+        if(magnitude(reinterpret_cast<const Point<double>&>(robot_pos), goal) < magnitude(last_followed_point_ , goal) && is_wall_following_)
         {
             is_wall_following_ = false;
+            current_followed_point_ = temp_followed_point;
         }
 
-        if(magnitude(robot, temp_followed_point_) < 0.3 && !is_wall_following_)
+        if(is_wall_following_)
         {
-            temp_followed_point_ = followed_point;
-            current_heruistic_distance_ = getHeruisticDistance(followed_point, goal, robot_pos);
+            current_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
+            if (direction_wall_following_flag_ == LEFT)
+            {
+                std::cout << "Wall following left" << std::endl;
+            }
+            else
+            {
+                std::cout << "Wall following right" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Standart following" << std::endl;
+        }
+
+
+        // Standart following, locked until point is reached
+        if(magnitude(robot, current_followed_point_) < 0.3 && !is_wall_following_)
+        {
+            last_followed_point_ = current_followed_point_;
+            current_followed_point_ = temp_followed_point;
+            current_heruistic_distance_ = getHeruisticDistance(temp_followed_point, goal, robot_pos);
+            last_followed_edge_ = current_followed_edge_;
+            current_followed_edge_ = edges[index];
 
             if(current_heruistic_distance_ < smallest_heruistic_distance_)
             {
                 smallest_heruistic_distance_ = current_heruistic_distance_;
-            }
+            }  
         }
 
-        //std::cout << smallest_heruistic_distance_ << "  " << current_heruistic_distance_ << std::endl;
-        waypoints.emplace_back(temp_followed_point_);
+        waypoints.emplace_back(current_followed_point_);
     }
 
+    //std::cout <<magnitude(reinterpret_cast<const Point<double>&>(robot_pos), goal)  << std::endl;
 
     return waypoints;
 }
@@ -246,7 +286,7 @@ diff_drive::LocalNav::findEdgeNormals(const Robot &robot_pos, const std::vector<
     return points;
 }
 diff_drive::Point<double>
-diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals)
+diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals, int* index)
 {
     diff_drive::Point<double> point;
     double robot_to_goal_dis;
@@ -263,6 +303,7 @@ diff_drive::LocalNav::findClosestAccessiblePoint(const Point<double>& goal, cons
 
             if(robot_to_goal_dis < smallest_dis)
             {
+                *index = i;
                 point = normals[i];
                 smallest_dis = robot_to_goal_dis;
             }

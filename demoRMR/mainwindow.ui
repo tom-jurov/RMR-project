@@ -86,7 +86,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Start</string>
+         <string>Global nav start</string>
         </property>
        </widget>
       </item>
@@ -276,7 +276,14 @@
          </size>
         </property>
         <property name="text">
-         <string>WallFollower</string>
+         <string>Local nav start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_14">
+        <property name="text">
+         <string>Set goal</string>
         </property>
        </widget>
       </item>
@@ -376,7 +383,7 @@
      <x>0</x>
      <y>0</y>
      <width>804</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
