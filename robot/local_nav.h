@@ -23,6 +23,8 @@ namespace diff_drive{
         std::vector<diff_drive::Point<double>> findEdgeNormals(const Robot &robot_pos,const std::vector<Point<double>>& edges, double edge_dis);
         diff_drive::Point<double> findClosestAccessiblePoint(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement, const std::vector<Point<double>>& normals, int* index);
         std::vector<Point<double>> generateWaypoints(const Point<double>& goal, const Robot &robot_pos, const LaserMeasurement& laser_measurement);
+    public:
+         bool first_edge_detected_ = true;
     private:
         std::vector<Point<double>> processLidar(const LaserMeasurement& laser_measurement, const Robot &robot_pos);
         Point<double> findTargetPoint(const LaserMeasurement& laser_measurement, const Robot &robot_pos);
@@ -31,7 +33,6 @@ namespace diff_drive{
         std::vector<bool> normals_switch_;
         double desired_distance_ = 0.5;
         Point<double> current_followed_point_, last_followed_point_;
-        bool first_edge_detected_ = true;
         double smallest_heruistic_distance_, current_heruistic_distance_;
         bool is_wall_following_ = false;
         bool direction_wall_following_flag_ = LEFT;

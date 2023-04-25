@@ -32,6 +32,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             current_heruistic_distance_ = smallest_heruistic_distance_;
             current_followed_edge_ = edges[index];
             last_followed_edge_ = current_followed_edge_;
+            is_wall_following_ = false;
             first_edge_detected_ = false;
         }
 
@@ -78,6 +79,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             {
                 std::cout << "Wall following right" << std::endl;
             }
+            std::cout << last_followed_edge_.x << " " << last_followed_edge_.y << std::endl;
         }
         else
         {
@@ -86,7 +88,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
 
 
         // Standart following, locked until point is reached
-        if(magnitude(robot, current_followed_point_) < 0.3 && !is_wall_following_)
+        if(magnitude(robot, current_followed_point_) < 0.15 && !is_wall_following_)
         {
             last_followed_point_ = current_followed_point_;
             current_followed_point_ = temp_followed_point;
@@ -102,8 +104,6 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
 
         waypoints.emplace_back(current_followed_point_);
     }
-
-    //std::cout <<magnitude(reinterpret_cast<const Point<double>&>(robot_pos), goal)  << std::endl;
 
     return waypoints;
 }

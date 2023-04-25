@@ -385,6 +385,7 @@ void MainWindow::on_pushButton_13_clicked()
 
 void MainWindow::on_pushButton_14_clicked()
 {
+    local_nav.first_edge_detected_ = true;
     goal_ ={0.0 , 0.0 };
 }
 
