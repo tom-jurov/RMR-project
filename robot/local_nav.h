@@ -6,6 +6,11 @@
 #include "utility.h"
 #include "rplidar.h"
 namespace diff_drive{
+    enum Direction{
+        LEFT = 0,
+        RIGHT = 1
+    };
+
     class ROBOT_EXPORT LocalNav
     {
     public:
@@ -26,6 +31,7 @@ namespace diff_drive{
         bool first_edge_detected_ = true;
         double smallest_heruistic_distance_, current_heruistic_distance_;
         bool is_wall_following_ = false;
+        bool direction_wall_following_flag_ = LEFT;
     };
 
 }

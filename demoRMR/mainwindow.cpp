@@ -168,9 +168,10 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     {
         //Real
         //diff_drive::Point<double> goal = {3.84, 0.93};
+        //diff_drive::Point<double> goal = {0, 3};
         //Sim
-        //diff_drive::Point<double> goal = {4.45, 1.83};
-        diff_drive::Point<double> goal = {4.45, 3.24};
+        diff_drive::Point<double> goal = {4.45, 1.83};
+        //diff_drive::Point<double> goal = {4.45, 3.24};
         controller.setGoal(goal);
         way_ = local_nav.generateWaypoints(goal, odom.getRobotState(),copyOfLaserData);
         controller.setPath(way_);
