@@ -40,21 +40,18 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
         if(getHeruisticDistance(current_followed_point_, goal, robot_pos) > smallest_heruistic_distance_)
         {
             auto first_vec = last_followed_edge_ + -1*reinterpret_cast<const Point<double>&>(robot_pos);
-            Point<double> second_vec = {sin(robot_pos.heading), cos(robot_pos.heading)};
-            double dot_product = first_vec.x * second_vec.x + first_vec.y * second_vec.y;
-            double mult_mag = norm(first_vec) * norm(second_vec);
-            double angle_of_vec = std::acos(dot_product/mult_mag);
-            //std::cout << angle_of_vec << std::endl;
-
+            Point<double> second_vec = {cos(robot_pos.heading), sin(robot_pos.heading)};
+            double position = sgn((second_vec.x - first_vec.x)*(last_followed_edge_.y - first_vec.y)-(second_vec.y-first_vec.y)*(last_followed_edge_.x-first_vec.x));
+            std::cout << position << std::endl;
             if(is_wall_following_ == false)
             {
-                if (angle_of_vec > 0 && angle_of_vec < M_PI/2)
+                if (position>0)
                 {
-                    direction_wall_following_flag_ = RIGHT;
+                    direction_wall_following_flag_ = LEFT;
                 }
                 else
                 {
-                    direction_wall_following_flag_ = LEFT;
+                    direction_wall_following_flag_ = RIGHT;
                 }
             }
 
@@ -79,7 +76,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             {
                 std::cout << "Wall following right" << std::endl;
             }
-            std::cout << last_followed_edge_.x << " " << last_followed_edge_.y << std::endl;
+            //std::cout << last_followed_edge_.x << " " << last_followed_edge_.y << std::endl;
         }
         else
         {
