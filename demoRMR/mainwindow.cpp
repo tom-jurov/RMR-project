@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #if SIM
     ipaddress="127.0.0.1";
 #else
-    ipaddress="192.168.1.15";
+    ipaddress="192.168.1.14";
 #endif
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
@@ -177,9 +177,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         way_ = local_nav.generateWaypoints(goal_, odom.getRobotState(),copyOfLaserData);
         controller.setPath(way_);
 
-        edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
+        /*edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
         normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.4);
-        follwed_point = local_nav.findClosestAccessiblePoint(goal_, odom.getRobotState(), copyOfLaserData, normals, &dummy);
+        follwed_point = local_nav.findClosestAccessiblePoint(goal_, odom.getRobotState(), copyOfLaserData, normals, &dummy);*/
     }
 
     if(first_cycle_)

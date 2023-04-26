@@ -37,12 +37,12 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
         }
 
         // Wall following, followed until leaving condiotion satsfied
-        if(getHeruisticDistance(current_followed_point_, goal, robot_pos) > smallest_heruistic_distance_)
+        if(current_heruistic_distance_ > smallest_heruistic_distance_)
         {
             auto first_vec = last_followed_edge_ + -1*reinterpret_cast<const Point<double>&>(robot_pos);
             Point<double> second_vec = {cos(robot_pos.heading), sin(robot_pos.heading)};
             double position = sgn((second_vec.x - first_vec.x)*(last_followed_edge_.y - first_vec.y)-(second_vec.y-first_vec.y)*(last_followed_edge_.x-first_vec.x));
-            std::cout << position << std::endl;
+
             if(is_wall_following_ == false)
             {
                 if (position>0)
@@ -54,7 +54,6 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
                     direction_wall_following_flag_ = RIGHT;
                 }
             }
-
             is_wall_following_ = true;
         }
 
@@ -63,7 +62,24 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
         {
             is_wall_following_ = false;
             current_followed_point_ = temp_followed_point;
+
+            if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < smallest_heruistic_distance_)
+            {
+                smallest_heruistic_distance_ = current_heruistic_distance_;
+            }
         }
+
+        // Leaving condition
+        /*if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < getHeruisticDistance(last_followed_point_, goal, robot_pos) && is_wall_following_)
+        {
+            is_wall_following_ = false;
+            current_followed_point_ = temp_followed_point;
+
+            if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < smallest_heruistic_distance_)
+            {
+                smallest_heruistic_distance_ = current_heruistic_distance_;
+            }
+        }*/
 
         if(is_wall_following_)
         {
@@ -76,7 +92,6 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             {
                 std::cout << "Wall following right" << std::endl;
             }
-            //std::cout << last_followed_edge_.x << " " << last_followed_edge_.y << std::endl;
         }
         else
         {
@@ -89,14 +104,15 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
         {
             last_followed_point_ = current_followed_point_;
             current_followed_point_ = temp_followed_point;
-            current_heruistic_distance_ = getHeruisticDistance(temp_followed_point, goal, robot_pos);
             last_followed_edge_ = current_followed_edge_;
             current_followed_edge_ = edges[index];
 
-            if(current_heruistic_distance_ < smallest_heruistic_distance_)
+            current_heruistic_distance_ = getHeruisticDistance(current_followed_point_, goal, robot_pos);
+
+            if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < smallest_heruistic_distance_)
             {
                 smallest_heruistic_distance_ = current_heruistic_distance_;
-            }  
+            }
         }
 
         waypoints.emplace_back(current_followed_point_);

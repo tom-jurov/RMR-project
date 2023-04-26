@@ -104,7 +104,7 @@ private:
      QTimer *timer;
      std::vector<diff_drive::Point<double>> edges;
      std::vector<diff_drive::Point<double>> normals;
-     diff_drive::Point<double> goal_ = {4.45, 1.83};
+     diff_drive::Point<double> goal_ = {4.45, 1.85};
      diff_drive::Point<double> follwed_point;
 
      QJoysticks *instance;
