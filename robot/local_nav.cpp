@@ -14,7 +14,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
 
     if(isPathClear(goal, robot_pos, laser_measurement, 0.2))
     {
-        std::cout << "Straight to goal" << std::endl;
+        //std::cout << "Straight to goal" << std::endl;
         waypoints.emplace_back(goal);
     }
     else
@@ -58,19 +58,7 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
         }
 
         // Leaving condition
-        if(magnitude(reinterpret_cast<const Point<double>&>(robot_pos), goal) < magnitude(last_followed_point_ , goal) && is_wall_following_)
-        {
-            is_wall_following_ = false;
-            current_followed_point_ = temp_followed_point;
-
-            if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < smallest_heruistic_distance_)
-            {
-                smallest_heruistic_distance_ = current_heruistic_distance_;
-            }
-        }
-
-        // Leaving condition
-        /*if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < getHeruisticDistance(last_followed_point_, goal, robot_pos) && is_wall_following_)
+        /*if(magnitude(reinterpret_cast<const Point<double>&>(robot_pos), goal) < magnitude(last_followed_point_ , goal) && is_wall_following_)
         {
             is_wall_following_ = false;
             current_followed_point_ = temp_followed_point;
@@ -81,21 +69,33 @@ diff_drive::LocalNav::generateWaypoints(const Point<double>& goal, const diff_dr
             }
         }*/
 
+        // Leaving condition
+        if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < getHeruisticDistance(last_followed_point_, goal, robot_pos) && is_wall_following_)
+        {
+            is_wall_following_ = false;
+            current_followed_point_ = temp_followed_point;
+
+            if(getHeruisticDistance(temp_followed_point, goal, robot_pos) < smallest_heruistic_distance_)
+            {
+                smallest_heruistic_distance_ = current_heruistic_distance_;
+            }
+        }
+
         if(is_wall_following_)
         {
             current_followed_point_ = findTargetPoint(laser_measurement,robot_pos);
             if (direction_wall_following_flag_ == LEFT)
             {
-                std::cout << "Wall following left" << std::endl;
+                //std::cout << "Wall following left" << std::endl;
             }
             else
             {
-                std::cout << "Wall following right" << std::endl;
+                //std::cout << "Wall following right" << std::endl;
             }
         }
         else
         {
-            std::cout << "Standart following" << std::endl;
+            //std::cout << "Standart following" << std::endl;
         }
 
 
@@ -198,7 +198,7 @@ bool diff_drive::LocalNav::isPathClear(const Point<double>& goal, const diff_dri
             laser_dis_crit = fabs(safe_zone/sin(laser_normalized_angle));
             laser_normalized_dis = fabs(laser_dis*cos(laser_normalized_angle));
 
-            if((laser_dis < laser_dis_crit) && ((laser_normalized_dis + 0.2) < robot_goal_distance) && ((laser_normalized_angle < 0.5*M_PI) || (laser_normalized_angle > 1.5*M_PI)))
+            if((laser_dis < laser_dis_crit) && ((laser_normalized_dis - 0.2) < robot_goal_distance) && ((laser_normalized_angle < 0.5*M_PI) || (laser_normalized_angle > 1.5*M_PI)))
             {
                  return false;
             }

@@ -6,7 +6,7 @@ diff_drive::Controller::Controller()
 ,   look_ahead_dist_(0.3)
 ,   last_found_index_(0)
 ,   linear_velocity_(0)
-,   goal_velocity_(400)
+,   goal_velocity_(700)
 ,   treshold_(0.3)
 {
 }
@@ -41,21 +41,21 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
 
     double D = 0;
     double discriminant = 0;
-    double sol_x1 = 0;
-    double sol_x2 = 0;
-    double sol_y1 = 0;
-    double sol_y2 = 0;
+    double solution_x1 = 0;
+    double solution_x2 = 0;
+    double solution_y1 = 0;
+    double solution_y2 = 0;
 
-    double minX = 0;
-    double minY = 0;
-    double maxX = 0;
-    double maxY = 0;
+    double min_x = 0;
+    double min_y = 0;
+    double max_x = 0;
+    double max_y = 0;
 
-    Point<double> sol_pt1{};
-    Point<double> sol_pt2{};
+    Point<double> solution_point_1{};
+    Point<double> solution_point_2{};
 
-    Point<double> goal_pt{};
-    for (std::size_t i = starting_index; i<path_.size() - 1; ++i)
+    Point<double> goal_point{};
+    for (std::size_t i = starting_index; i < path_.size() - 1; ++i)
     {
         x1 = path_[i].x - current_state_.x;
         y1 = path_[i].y - current_state_.y;
@@ -69,45 +69,45 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         discriminant = (look_ahead_dist_ * look_ahead_dist_) * (dr * dr) - (D * D);
         if (discriminant >= 0)
         {
-            sol_x1 = (D * dy + sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
-            sol_x2 = (D * dy - sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
-            sol_y1 = (-D * dx + fabs(dy) * sqrt(discriminant)) / (dr * dr);
-            sol_y2 = (-D * dx - fabs(dy) * sqrt(discriminant)) / (dr * dr);
+            solution_x1 = (D * dy + sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
+            solution_x2 = (D * dy - sgn(dy) * dx * sqrt(discriminant)) / (dr * dr);
+            solution_y1 = (-D * dx + fabs(dy) * sqrt(discriminant)) / (dr * dr);
+            solution_y2 = (-D * dx - fabs(dy) * sqrt(discriminant)) / (dr * dr);
 
-            sol_pt1 = {sol_x1 + current_state_.x, sol_y1 + current_state_.y};
-            sol_pt2 = {sol_x2 + current_state_.x, sol_y2 + current_state_.y};
-            minX = std::min(path_[i].x, path_[i+1].x);
-            minY = std::min(path_[i].y, path_[i+1].y);
-            maxX = std::max(path_[i].x, path_[i+1].x);
-            maxY = std::max(path_[i].y, path_[i+1].y);
-            if (((minX <= sol_pt1.x && sol_pt1.x <= maxX) && (minY <= sol_pt1.y && sol_pt1.y <= maxY)) ||
-                ((minX <= sol_pt2.x && sol_pt2.x <= maxX) && (minY <= sol_pt2.y && sol_pt2.y <= maxY)))
+            solution_point_1 = {solution_x1 + current_state_.x, solution_y1 + current_state_.y};
+            solution_point_2 = {solution_x2 + current_state_.x, solution_y2 + current_state_.y};
+            min_x = std::min(path_[i].x, path_[i+1].x);
+            min_y = std::min(path_[i].y, path_[i+1].y);
+            max_x = std::max(path_[i].x, path_[i+1].x);
+            max_y = std::max(path_[i].y, path_[i+1].y);
+            if (((min_x <= solution_point_1.x && solution_point_1.x <= max_x) && (min_y <= solution_point_1.y && solution_point_1.y <= max_y)) ||
+                ((min_x <= solution_point_2.x && solution_point_2.x <= max_x) && (min_y <= solution_point_2.y && solution_point_2.y <= max_y)))
             {
                 intersection_found = true;
-                if (((minX <= sol_pt1.x && sol_pt1.x <= maxX) && (minY <= sol_pt1.y && sol_pt1.y <= maxY)) &&
-                    ((minX <= sol_pt2.x && sol_pt2.x <= maxX) && (minY <= sol_pt2.y && sol_pt2.y <= maxY)))
+                if (((min_x <= solution_point_1.x && solution_point_1.x <= max_x) && (min_y <= solution_point_1.y && solution_point_1.y <= max_y)) &&
+                    ((min_x <= solution_point_2.x && solution_point_2.x <= max_x) && (min_y <= solution_point_2.y && solution_point_2.y <= max_y)))
                 {
-                    if (magnitude(sol_pt1, path_[i+1]) < magnitude(sol_pt2, path_[i+1]))
+                    if (magnitude(solution_point_1, path_[i+1]) < magnitude(solution_point_2, path_[i+1]))
                     {
-                        goal_pt = sol_pt1;
+                        goal_point = solution_point_1;
                     }
                     else
                     {
-                        goal_pt = sol_pt2;
+                        goal_point = solution_point_2;
                     }
                 }
                 else
                 {
-                    if ((minX <= sol_pt1.x && sol_pt1.x <= maxX) && (minY <= sol_pt1.y && sol_pt1.y <= maxY))
+                    if ((min_x <= solution_point_1.x && solution_point_1.x <= max_x) && (min_y <= solution_point_1.y && solution_point_1.y <= max_y))
                     {
-                        goal_pt = sol_pt1;
+                        goal_point = solution_point_1;
                     }
                     else
                     {
-                        goal_pt = sol_pt2;
+                        goal_point = solution_point_2;
                     }
                 }
-                if (magnitude(goal_pt, path_[i+1]) < magnitude(Point<double>{current_state_.x, current_state_.y},path_[i+1]))
+                if (magnitude(goal_point, path_[i+1]) < magnitude(Point<double>{current_state_.x, current_state_.y},path_[i+1]))
                 {
                     last_found_index_ = i;
                     break;
@@ -121,12 +121,12 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
         else
         {
             intersection_found = false;
-            goal_pt = {path_[last_found_index_].x, path_[last_found_index_].y};
+            goal_point = {path_[last_found_index_].x, path_[last_found_index_].y};
         }
     }*/
-    diff_drive::Point<double> goal_pt = path_[1];
+    diff_drive::Point<double> goal_point = path_[1];
 
-    double target_angle = atan2( (goal_pt.y - current_state_.y), (goal_pt.x - current_state_.x) );
+    double target_angle = atan2( (goal_point.y - current_state_.y), (goal_point.x - current_state_.x) );
 
     if (target_angle < 0)
     {
@@ -142,7 +142,7 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     double distance_to_go = magnitude(goal_, reinterpret_cast<Point<double>&>(current_state_));
     if (distance_to_go < treshold_)
     {
-        if (distance_to_go < 0.09)
+        if (distance_to_go < 0.05)
         {
             linear_velocity_ = 0;
             last_found_index_ = 0;
@@ -156,8 +156,12 @@ diff_drive::CTRL_Output diff_drive::Controller::controlStep()
     }
 
     if (linear_velocity_ < goal_velocity_)
-        linear_velocity_ += static_cast<int>(goal_velocity_/40);
+        linear_velocity_ += static_cast<int>(goal_velocity_/70);
     double r = 1000*look_ahead_dist_/(2*sin(turn_error));
-    //std::cout << goal_pt.x << " " << goal_pt.y << " " << r/1000 << std::endl;
-    return {linear_velocity_, static_cast<int>(r)};
+    int vel = static_cast<int>(linear_velocity_*fabs(r)*0.001);
+    if (vel>700)
+    {
+        vel = 700;
+    }
+    return {vel, static_cast<int>(r)};
 }
