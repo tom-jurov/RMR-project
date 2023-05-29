@@ -4,7 +4,7 @@
 #include <utility.h>
 #include <queue>
 #include <algorithm>
-#include "robot.h"
+#include "robot_global.h"
 
 namespace diff_drive{
     class ROBOT_EXPORT GlobalNav
@@ -13,8 +13,8 @@ namespace diff_drive{
         static constexpr int ROW = 115;
         static constexpr int COL = 115;
         static constexpr int GRID_SIZE = 5;
-        static constexpr double X_OFFSET = 60;
-        static constexpr double Y_OFFSET = 72;
+        static constexpr double X_OFFSET = 50;
+        static constexpr double Y_OFFSET = 50;
     public:
         GlobalNav() = default;
         GlobalNav(const std::vector<std::vector<int>>& map, double s_x, double s_y, double g_x, double g_y);

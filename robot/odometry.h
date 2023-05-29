@@ -20,6 +20,7 @@ namespace diff_drive
         double getHeading() const;
         double getX() const;
         double getY() const;
+        const Robot getRobotState() const;
         double getAngularSpeed() const;
         std::pair<double, double> ticksToMeters(short left_encoder, short right_encoder);
         void setWheelSeparation(double value);

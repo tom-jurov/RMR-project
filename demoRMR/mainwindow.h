@@ -30,6 +30,7 @@
 #include "map.h"
 #include "map_loader.h"
 #include "global_nav.h"
+#include "local_nav.h"
 #include <QJoysticks.h>
 namespace Ui {
 class MainWindow;
@@ -77,6 +78,8 @@ private slots:
     void on_pushButton_11_clicked();
 
     void on_pushButton_12_clicked();
+    void on_pushButton_13_clicked();
+    void on_pushButton_14_clicked();
 
     void on_pushButton_clicked();
     void getNewFrame();
@@ -95,8 +98,14 @@ private:
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
      diff_drive::Map map;
+     diff_drive::LocalNav local_nav;
      diff_drive::GlobalNav global_nav;
+     std::vector<diff_drive::Point<double>> way_;
      QTimer *timer;
+     std::vector<diff_drive::Point<double>> edges;
+     std::vector<diff_drive::Point<double>> normals;
+     diff_drive::Point<double> goal_ = {4.45, 1.85};
+     diff_drive::Point<double> follwed_point;
 
      QJoysticks *instance;
      bool first_cycle_ = true;
