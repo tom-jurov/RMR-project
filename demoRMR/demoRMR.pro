@@ -20,7 +20,6 @@ LIBS += -L../bin -lrobot
 
 # QMAKE_CXXFLAGS += -fsanitize=address
 # QMAKE_LFLAGS += -fsanitize=address
-INCLUDEPATH += C:/Sophus/include
 INCLUDEPATH += "C:/Program Files/PCL 1.14.1/3rdParty/Eigen3/include/eigen3"
 win32 {
     INCLUDEPATH += C:/opencv_vc17/include/

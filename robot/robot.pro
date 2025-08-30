@@ -11,11 +11,7 @@ DESTDIR = ../bin
 # QMAKE_CXXFLAGS += -fsanitize=address
 # QMAKE_LFLAGS += -fsanitize=address
 
-G2O_INC = "C:/Program Files/g2o/include"
-G2O_LIB = "C:/Program Files/g2o/lib"
-INCLUDEPATH += C:/Sophus/include
 INCLUDEPATH += "C:/Program Files/PCL 1.14.1/3rdParty/Eigen3/include/eigen3"
-INCLUDEPATH += $$G2O_INC
 
 win32 {
     INCLUDEPATH += C:/opencv_vc17/include/
@@ -37,12 +33,6 @@ win32 {
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_photo4100d
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_shape4100d
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_video4100d
-        LIBS += -L$$G2O_LIB
-        LIBS += -lg2o_core_d \
-                -lg2o_types_slam3d_d \
-                -lg2o_solver_csparse_d \
-                -lg2o_csparse_extension_d \
-                -lg2o_stuff_d
     }
     else {
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_core4100
@@ -59,12 +49,6 @@ win32 {
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_photo4100
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_shape4100
         LIBS +=-LC:/opencv_vc17/x64/vc17/lib -lopencv_video4100
-        LIBS += -L$$G2O_LIB
-        LIBS += -lg2o_core \
-                -lg2o_types_slam3d \
-                -lg2o_solver_csparse \
-                -lg2o_csparse_extension \
-                -lg2o_stuff
     }
 }
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
