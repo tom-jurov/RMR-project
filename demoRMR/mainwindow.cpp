@@ -289,9 +289,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         //goal_ = {4.45, 1.83};
         //goal_ = {4.45, 3.24};
         int dummy;
-        controller.setGoal(goal_);
-        way_ = local_nav.generateWaypoints(goal_, odom.getRobotState(),copyOfLaserData);
-        controller.setPath(way_);
 
         /*edges = local_nav.findObstacleEdges(odom.getRobotState(), copyOfLaserData);
         normals = local_nav.findEdgeNormals(odom.getRobotState(), edges, 0.4);
@@ -322,12 +319,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
     odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
-    if (start_)
-    {
-        controller.setCurrentPosition(odom);
-        auto control_output = controller.controlStep();
-        robot.setArcSpeed(control_output.speed, control_output.radius);
-    }
     if(datacounter%5)
     {
         ///ak nastavite hodnoty priamo do prvkov okna,ako je to na tychto zakomentovanych riadkoch tak sa moze stat ze vam program padne
@@ -360,7 +351,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     updateLaserPicture=1;
     // Process scan
     mapping->odom_buffer.AddOdometry(
-        Sophus::SE2d(Sophus::SO2d(odom.getHeading()), Eigen::Vector2d(odom.getX(), odom.getY()))
+        SE2(Eigen::Vector2d(odom.getX(), odom.getY()), odom.getHeading())
         );
     auto laser_ptr = std::make_shared<LaserMeasurement>(laserData);
     mapping->ProcessScan(laser_ptr);
@@ -451,22 +442,9 @@ void MainWindow::on_pushButton_8_clicked() //reset
     odom.setHeading(0);
 }
 
-void MainWindow::on_pushButton_10_clicked()
-{
-    auto waypoints = global_nav.generateWaypoints();
-    controller.setPath(waypoints);
-    start_ = true;
-}
-
 void MainWindow::on_pushButton_13_clicked()
 {
     start_ = true;
-}
-
-void MainWindow::on_pushButton_14_clicked()
-{
-    local_nav.first_edge_detected_ = true;
-    goal_ ={0.0 , 0.0 };
 }
 
 void MainWindow::on_pushButton_clicked()

@@ -26,10 +26,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include "robot.h"
 #include "odometry.h"
-#include "controller.h"
 #include "occupancy_map.h"
-#include "global_nav.h"
-#include "local_nav.h"
 #include <QJoysticks.h>
 #include <mapping_2d.h>
 namespace Ui {
@@ -73,10 +70,7 @@ private slots:
 
     void on_pushButton_8_clicked();
 
-    void on_pushButton_10_clicked();
-
     void on_pushButton_13_clicked();
-    void on_pushButton_14_clicked();
 
     void on_pushButton_clicked();
     void getNewFrame();
@@ -92,15 +86,7 @@ private:
      TKobukiData robotdata;
      int datacounter;
      diff_drive::Odometry odom;
-     diff_drive::Controller controller;
-     diff_drive::LocalNav local_nav;
-     diff_drive::GlobalNav global_nav;
-     std::vector<diff_drive::Point<double>> way_;
      QTimer *timer;
-     std::vector<diff_drive::Point<double>> edges;
-     std::vector<diff_drive::Point<double>> normals;
-     diff_drive::Point<double> goal_ = {4.45, 1.85};
-     diff_drive::Point<double> follwed_point;
      Mapping2D *mapping;
 
      QJoysticks *instance;

@@ -1,10 +1,7 @@
 //
 // Created by xiang on 2022/3/23.
 //
-
-#ifndef SLAM_IN_AUTO_DRIVING_SUBMAP_H
-#define SLAM_IN_AUTO_DRIVING_SUBMAP_H
-
+#pragma once
 #include "frame.h"
 #include "likelihood_filed.h"
 #include "occupancy_map.h"
@@ -16,25 +13,18 @@ public:
         field_.SetPose(pose_);
     }
 
-    /// 把另一个submap中的占据栅格复制到本地图中
     void SetOccuFromOtherSubmap(std::shared_ptr<Submap> other);
 
-    /// 将frame与本submap进行匹配，计算frame->pose
     bool MatchScan(std::shared_ptr<Frame> frame);
 
-    /// 判定当前的scan是否有位于submap外部的点
     bool HasOutsidePoints() const;
 
-    /// 在栅格地图中增加一个帧
     void AddScanInOccupancyMap(std::shared_ptr<Frame> frame);
 
-    /// 在子地图中增加一个关键帧
     void AddKeyFrame(std::shared_ptr<Frame> frame) { frames_.emplace_back(frame); }
 
-    /// 当子地图的位姿更新时，重设每个frame的世界位姿
     void UpdateFramePoseWorld();
 
-    /// accessors
     OccupancyMap& GetOccuMap() { return occu_map_; }
     LikelihoodField& GetLikelihood() { return field_; }
 
@@ -48,12 +38,10 @@ public:
     SE2 GetPose() const { return pose_; }
 
 private:
-    SE2 pose_;  // submap的pose, Tws
+    SE2 pose_;
     size_t id_ = 0;
 
-    std::vector<std::shared_ptr<Frame>> frames_;  // 一个submap中的关键帧
-    LikelihoodField field_;                       // 用于匹配
-    OccupancyMap occu_map_;                       // 用于生成栅格地图
+    std::vector<std::shared_ptr<Frame>> frames_;
+    LikelihoodField field_;
+    OccupancyMap occu_map_;
 };
-
-#endif  // SLAM_IN_AUTO_DRIVING_SUBMAP_H

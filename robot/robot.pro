@@ -94,15 +94,9 @@ INCLUDEPATH += /usr/local/include/opencv4/
 
 SOURCES += \
     CKobuki.cpp \
-    controller.cpp \
-    global_nav.cpp \
     lidar_2d_utils.cpp \
     likelihood_filed.cpp \
-    local_nav.cpp \
-    loop_closing.cpp \
-    map_loader.cpp \
     mapping_2d.cpp \
-    multi_resolution_likelihood_field.cpp \
     occupancy_map.cpp \
     odometry.cpp \
     robot.cpp \
@@ -111,19 +105,11 @@ SOURCES += \
 
 HEADERS += \
     CKobuki.h \
-    controller.h \
-    eigen_types.h \
     frame.h \
-    g2o_types.h \
-    global_nav.h \
     lidar_2d_utils.h \
     likelihood_filed.h \
-    local_nav.h \
-    loop_closing.h \
-    map_loader.h \
     mapping_2d.h \
     math_utils.h \
-    multi_resolution_likelihood_field.h \
     occupancy_map.h \
     odometry.h \
     robot_global.h \

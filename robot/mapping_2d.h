@@ -1,20 +1,13 @@
 //
 // Created by xiang on 2022/3/23.
 //
-
-#ifndef SLAM_IN_AUTO_DRIVING_MAPPING_2D_H
-#define SLAM_IN_AUTO_DRIVING_MAPPING_2D_H
-
+#pragma once
 #include "frame.h"
-#include "eigen_types.h"
-
+#include <utility.h>
 #include <memory>
 #include <opencv2/core.hpp>
 #include <deque>
-
 class Submap;
-class LoopClosing;
-
 
 // class OdometryBuffer {
 // public:
@@ -53,13 +46,13 @@ class LoopClosing;
 // };
 class OdometryBuffer {
 public:
-    void AddOdometry(const Sophus::SE2d &pose) {
+    void AddOdometry(const SE2 &pose) {
         std::lock_guard<std::mutex> lock(mutex_);
         prev_pose_ = curr_pose_;
         curr_pose_ = pose;
     }
 
-    void GetDeskewPoses(Sophus::SE2d &prev, Sophus::SE2d &curr) const {
+    void GetDeskewPoses(SE2 &prev, SE2 &curr) const {
         std::lock_guard<std::mutex> lock(mutex_);
         prev = prev_pose_;
         curr = curr_pose_;
@@ -67,40 +60,26 @@ public:
 
 private:
     mutable std::mutex mutex_;
-    Sophus::SE2d prev_pose_ = Sophus::SE2d();  // identity
-    Sophus::SE2d curr_pose_ = Sophus::SE2d();  // identity
+    SE2 prev_pose_ = SE2();  // identity (t = [0,0], theta = 0)
+    SE2 curr_pose_ = SE2();  // identity
 };
 
-/**
- * 2D 激光建图的主要类
- */
 class ROBOT_EXPORT Mapping2D {
 public:
     bool Init(bool with_loop_closing = true);
 
-    /// 单回波的scan
     bool ProcessScan(std::shared_ptr<LaserMeasurement> scan);
 
-    /**
-     * 显示全局地图
-     * @param max_size 全局地图最大长宽
-     * @return 全局地图图像
-     */
-    cv::Mat ShowGlobalMap(int max_size = 500);
     OdometryBuffer odom_buffer;
 
 private:
-    /// 判定当前帧是否为关键帧
     bool IsKeyFrame();
 
-    /// 增加一个关键帧
     void AddKeyFrame();
 
-    /// 扩展新的submap
     void ExpandSubmap();
     void UndistortScan(LaserMeasurement &measurement);
 
-    /// 数据成员
     size_t frame_id_ = 0;
     size_t keyframe_id_ = 0;
     size_t submap_id_ = 0;
@@ -114,12 +93,6 @@ private:
 
     std::vector<std::shared_ptr<Submap>> all_submaps_;
 
-    std::shared_ptr<LoopClosing> loop_closing_ = nullptr;  // 回环检测
-
-    // 参数
     inline static constexpr double keyframe_pos_th_ = 0.3;              // 关键帧位移量
     inline static constexpr double keyframe_ang_th_ = 15 * M_PI / 180;  // 关键帧角度量
 };
-
-
-#endif  // SLAM_IN_AUTO_DRIVING_MAPPING_2D_H

@@ -1,5 +1,4 @@
-#ifndef MATH_UTILS_H
-#define MATH_UTILS_H
+#pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <opencv2/core.hpp>
@@ -28,6 +27,3 @@ namespace math{
              xx * yy * data[img.step / sizeof(T) + 1]);
     }
 }
-
-
-#endif // MATH_UTILS_H

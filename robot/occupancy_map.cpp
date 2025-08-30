@@ -1,10 +1,9 @@
 //
 // Created by xiang on 2022/3/23.
 //
-
+#define NOMINMAX
 #include "occupancy_map.h"
-#include "eigen_types.h"
-
+#include <utility.h>
 #include <execution>
 #include <set>
 #include <cmath>
@@ -56,13 +55,10 @@ double OccupancyMap::FindRangeInAngle(double angle, std::shared_ptr<LaserMeasure
 void OccupancyMap::AddLidarFrame(std::shared_ptr<Frame> frame, GridMethod method) {
     auto& scan = frame->scan_;
 
-    // 此处不能直接使用frame->pose_submap_，因为frame可能来自上一个地图
-    // 此时frame->pose_submap_还未更新，依旧是frame在上一个地图中的pose
     SE2 pose_in_submap = pose_.inverse() * frame->pose_;
-    float theta = pose_in_submap.so2().log();
+    float theta = pose_in_submap.theta;
     has_outside_pts_ = false;
 
-    // 先计算末端点所在的网格
     std::set<Vec2i, less_vec<2>> endpoints;
 
     for (int i = 0; i < scan->numberOfScans; ++i) {
@@ -79,23 +75,19 @@ void OccupancyMap::AddLidarFrame(std::shared_ptr<Frame> frame, GridMethod method
     }
 
     if (method == GridMethod::MODEL_POINTS) {
-        // 遍历模板，生成白色点
         std::for_each(std::execution::par_unseq, model_.begin(), model_.end(), [&](const Model2DPoint& pt) {
             Vec2i pos_in_image = World2Image(frame->pose_.translation());
             Vec2i pw = pos_in_image + Vec2i(pt.dx_, pt.dy_);  // submap下
 
             if (pt.range_ < closest_th_) {
-                // 小距离内认为无物体
                 SetPoint(pw, false);
                 return;
             }
 
-            double angle = pt.angle_ - theta;  // 激光系下角度
+            double angle = pt.angle_ - theta;
             double range = FindRangeInAngle(angle, scan);
 
             if (range == 0.0) {
-                /// 某方向无测量值时，认为无效
-                /// 但离机器比较近时，涂白
                 if (pt.range_ < endpoint_close_th_) {
                     SetPoint(pw, false);
                 }
@@ -103,7 +95,6 @@ void OccupancyMap::AddLidarFrame(std::shared_ptr<Frame> frame, GridMethod method
             }
 
             if (range > pt.range_ && endpoints.find(pw) == endpoints.end()) {
-                /// 末端点与车体连线上的点，涂白
                 SetPoint(pw, false);
             }
         });
@@ -113,7 +104,6 @@ void OccupancyMap::AddLidarFrame(std::shared_ptr<Frame> frame, GridMethod method
                       [this, &start](const auto& pt) { BresenhamFilling(start, pt); });
     }
 
-    /// 末端点涂黑
     std::for_each(endpoints.begin(), endpoints.end(), [this](const auto& pt) { SetPoint(pt, true); });
 }
 
@@ -127,7 +117,6 @@ void OccupancyMap::SetPoint(const Vec2i& pt, bool occupy) {
         return;
     }
 
-    /// 这里设置了一个上下限
     uchar value = occupancy_grid_.at<uchar>(y, x);
     if (occupy) {
         if (value > 117) {
@@ -169,7 +158,6 @@ void OccupancyMap::BresenhamFilling(const Vec2i& p1, const Vec2i& p2) {
     int y = p1.y();
 
     if (dx > dy) {
-        // 以x为增量
         int e = -dx;
         for (int i = 0; i < dx; ++i) {
             x += ux;
