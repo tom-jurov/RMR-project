@@ -44,8 +44,9 @@
 typedef struct
 {
     int scanQuality;
-    double scanAngle;
-    double scanDistance;
+    float scanAngle;
+    float scanDistance;
+    uint32_t timestamp;
 }LaserData;
 
 typedef struct

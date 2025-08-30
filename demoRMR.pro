@@ -6,3 +6,5 @@ SUBDIRS += robot\
 
 
 CONFIG += ordered
+# QMAKE_CXXFLAGS += -fsanitize=address
+# QMAKE_LFLAGS += -fsanitize=address

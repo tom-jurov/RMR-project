@@ -116,7 +116,6 @@ void Robot::robotprocess()
 
 
 
-
             ///---toto je callback funkcia...
             std::async(std::launch::async, [this](TKobukiData sensdata) { robot_callback(sensdata); },sens);
 

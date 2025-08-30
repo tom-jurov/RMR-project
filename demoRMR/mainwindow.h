@@ -27,11 +27,11 @@
 #include "robot.h"
 #include "odometry.h"
 #include "controller.h"
-#include "map.h"
-#include "map_loader.h"
+#include "occupancy_map.h"
 #include "global_nav.h"
 #include "local_nav.h"
 #include <QJoysticks.h>
+#include <mapping_2d.h>
 namespace Ui {
 class MainWindow;
 }
@@ -75,9 +75,6 @@ private slots:
 
     void on_pushButton_10_clicked();
 
-    void on_pushButton_11_clicked();
-
-    void on_pushButton_12_clicked();
     void on_pushButton_13_clicked();
     void on_pushButton_14_clicked();
 
@@ -88,7 +85,6 @@ private:
 
     //--skuste tu nic nevymazat... pridavajte co chcete, ale pri odoberani by sa mohol stat nejaky drobny problem, co bude vyhadzovat chyby
     Ui::MainWindow *ui;
-     void paintEvent(QPaintEvent *event);// Q_DECL_OVERRIDE;
      int updateLaserPicture;
      LaserMeasurement copyOfLaserData;
      std::string ipaddress;
@@ -97,7 +93,6 @@ private:
      int datacounter;
      diff_drive::Odometry odom;
      diff_drive::Controller controller;
-     diff_drive::Map map;
      diff_drive::LocalNav local_nav;
      diff_drive::GlobalNav global_nav;
      std::vector<diff_drive::Point<double>> way_;
@@ -106,6 +101,7 @@ private:
      std::vector<diff_drive::Point<double>> normals;
      diff_drive::Point<double> goal_ = {4.45, 1.85};
      diff_drive::Point<double> follwed_point;
+     Mapping2D *mapping;
 
      QJoysticks *instance;
      bool first_cycle_ = true;

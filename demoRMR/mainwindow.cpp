@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
+#include <Sophus/se2.hpp>
 ///TOTO JE DEMO PROGRAM...AK SI HO NASIEL NA PC V LABAKU NEPREPISUJ NIC,ALE SKOPIRUJ SI MA NIEKAM DO INEHO FOLDERA
 /// AK HO MAS Z GITU A ROBIS NA LABAKOVOM PC, TAK SI HO VLOZ DO FOLDERA KTORY JE JASNE ODLISITELNY OD TVOJICH KOLEGOV
 /// NASLEDNE V POLOZKE Projects SKONTROLUJ CI JE VYPNUTY shadow build...
@@ -29,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(timer, SIGNAL(timeout()), this, SLOT(getNewFrame()));
     actIndex=-1;
     useCamera1=false;
+    mapping = new Mapping2D();
+    mapping->Init(true); // Crucial: Initialize the mapping object
 
 
 
@@ -43,112 +46,225 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::paintEvent(QPaintEvent *event)
-{
-    QPainter painter(this);
-    ///prekreslujem obrazovku len vtedy, ked viem ze mam nove data. paintevent sa
-    /// moze pochopitelne zavolat aj z inych dovodov, napriklad zmena velkosti okna
-    painter.setBrush(Qt::black);//cierna farba pozadia(pouziva sa ako fill pre napriklad funkciu drawRect)
-    QPen pero;
-    pero.setStyle(Qt::SolidLine);//styl pera - plna ciara
-    pero.setWidth(3);//hrubka pera -3pixely
-    pero.setColor(Qt::green);//farba je zelena
-    QRect rect;
-    rect= ui->frame->geometry();//ziskate porametre stvorca,do ktoreho chcete kreslit
-    rect.translate(0,15);
-    painter.drawRect(rect);
-    if(useCamera1==true && actIndex>-1)/// ak zobrazujem data z kamery a aspon niektory frame vo vectore je naplneny
-    {
-        std::cout<<actIndex<<std::endl;
-        QImage image = QImage((uchar*)frame[actIndex].data, frame[actIndex].cols, frame[actIndex].rows, frame[actIndex].step, QImage::Format_RGB888  );//kopirovanie cvmat do qimage
-        painter.drawImage(rect,image.rgbSwapped());
-    }
-    else
-    {
-        if(updateLaserPicture==1) ///ak mam nove data z lidaru
-        {
-            updateLaserPicture=0;
+// void MainWindow::paintEvent(QPaintEvent *event)
+// {
+//     QPainter painter(this);
+//     ///prekreslujem obrazovku len vtedy, ked viem ze mam nove data. paintevent sa
+//     /// moze pochopitelne zavolat aj z inych dovodov, napriklad zmena velkosti okna
+//     painter.setBrush(Qt::black);//cierna farba pozadia(pouziva sa ako fill pre napriklad funkciu drawRect)
+//     QPen pero;
+//     pero.setStyle(Qt::SolidLine);//styl pera - plna ciara
+//     pero.setWidth(3);//hrubka pera -3pixely
+//     pero.setColor(Qt::green);//farba je zelena
+//     QRect rect;
+//     rect= ui->frame->geometry();//ziskate porametre stvorca,do ktoreho chcete kreslit
+//     rect.translate(0,15);
+//     painter.drawRect(rect);
+//     if(useCamera1==true && actIndex>-1)/// ak zobrazujem data z kamery a aspon niektory frame vo vectore je naplneny
+//     {
+//         std::cout<<actIndex<<std::endl;
+//         QImage image = QImage((uchar*)frame[actIndex].data, frame[actIndex].cols, frame[actIndex].rows, frame[actIndex].step, QImage::Format_RGB888  );//kopirovanie cvmat do qimage
+//         painter.drawImage(rect,image.rgbSwapped());
+//     }
+//     else
+//     {
+//         if(updateLaserPicture==1) ///ak mam nove data z lidaru
+//         {
+//             updateLaserPicture=0;
 
-            painter.setPen(pero);
-            //teraz tu kreslime random udaje... vykreslite to co treba... t.j. data z lidaru
-         //   std::cout<<copyOfLaserData.numberOfScans<<std::endl;
-            for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
-            {
-                int dist=copyOfLaserData.Data[k].scanDistance/20; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazenia
-                int xp=rect.width()-(rect.width()/2+dist*2*sin((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
-                int yp=rect.height()-(rect.height()/2+dist*2*cos((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
-                if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                    painter.drawEllipse(QPoint(xp, yp),2,2);       
-            }
+//             painter.setPen(pero);
+//             //teraz tu kreslime random udaje... vykreslite to co treba... t.j. data z lidaru
+//          //   std::cout<<copyOfLaserData.numberOfScans<<std::endl;
+//             for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
+//             {
+//                 int dist=copyOfLaserData.Data[k].scanDistance/20; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazenia
+//                 int xp=rect.width()-(rect.width()/2+dist*2*sin((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
+//                 int yp=rect.height()-(rect.height()/2+dist*2*cos((-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
+//                 if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                     painter.drawEllipse(QPoint(xp, yp),2,2);
+//             }
 
-            if(way_.size() > 0)
-            {
-                pero.setWidth(6);//hrubka pera -3pixely
-                pero.setColor(Qt::blue);//farba je zelena
-                painter.setPen(pero);
-                for(int i=0; i < way_.size(); i++)
-                {
-                    int xp=rect.width()-(rect.width()/2 + 100*(way_[1].x - odom.getX())*sin(-odom.getHeading()) + 100*(way_[1].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
-                    int yp=rect.height()-(rect.height()/2 + 100*(way_[1].x - odom.getX())*cos(-odom.getHeading()) - 100*(way_[1].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
-                    int rx=rect.width()-(rect.width()/2) + rect.topLeft().x();
-                    int ry=rect.height()-(rect.height()/2) + rect.topLeft().y();
-                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                    {
-                        painter.drawEllipse(QPoint(xp, yp),2,2);
-                        painter.drawEllipse(QPoint(rx, ry),10,10);
-                    }
-                }
-            }
+//             if(way_.size() > 0)
+//             {
+//                 pero.setWidth(6);//hrubka pera -3pixely
+//                 pero.setColor(Qt::blue);//farba je zelena
+//                 painter.setPen(pero);
+//                 for(int i=0; i < way_.size(); i++)
+//                 {
+//                     int xp=rect.width()-(rect.width()/2 + 100*(way_[1].x - odom.getX())*sin(-odom.getHeading()) + 100*(way_[1].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+//                     int yp=rect.height()-(rect.height()/2 + 100*(way_[1].x - odom.getX())*cos(-odom.getHeading()) - 100*(way_[1].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+//                     int rx=rect.width()-(rect.width()/2) + rect.topLeft().x();
+//                     int ry=rect.height()-(rect.height()/2) + rect.topLeft().y();
+//                     if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                     {
+//                         painter.drawEllipse(QPoint(xp, yp),2,2);
+//                         painter.drawEllipse(QPoint(rx, ry),10,10);
+//                     }
+//                 }
+//             }
 
-            pero.setWidth(3);//hrubka pera -3pixely
-            painter.setBrush(QBrush());
-            pero.setColor(Qt::yellow);//farba je zelena
-            painter.setPen(pero);
-            int xp=rect.width()-rect.width()/2+rect.topLeft().x(); //prepocet do obrazovky
-            int yp=rect.height()-rect.height()/2+rect.topLeft().y();//prepocet do obrazovky
-            if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                painter.drawEllipse(QPoint(xp, yp),270,270);
+//             pero.setWidth(3);//hrubka pera -3pixely
+//             painter.setBrush(QBrush());
+//             pero.setColor(Qt::yellow);//farba je zelena
+//             painter.setPen(pero);
+//             int xp=rect.width()-rect.width()/2+rect.topLeft().x(); //prepocet do obrazovky
+//             int yp=rect.height()-rect.height()/2+rect.topLeft().y();//prepocet do obrazovky
+//             if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                 painter.drawEllipse(QPoint(xp, yp),270,270);
 
-            if(edges.size() > 0)
-            {
-                pero.setWidth(6);//hrubka pera -3pixely
-                pero.setColor(Qt::red);//farba je zelena
-                painter.setPen(pero);
-                for(int i=0; i < edges.size(); i++)
-                {
-                    int xp=rect.width()-(rect.width()/2 + 100*(edges[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(edges[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
-                    int yp=rect.height()-(rect.height()/2 + 100*(edges[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(edges[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
-                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                        painter.drawEllipse(QPoint(xp, yp),2,2);
-                }
-            }
+//             if(edges.size() > 0)
+//             {
+//                 pero.setWidth(6);//hrubka pera -3pixely
+//                 pero.setColor(Qt::red);//farba je zelena
+//                 painter.setPen(pero);
+//                 for(int i=0; i < edges.size(); i++)
+//                 {
+//                     int xp=rect.width()-(rect.width()/2 + 100*(edges[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(edges[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+//                     int yp=rect.height()-(rect.height()/2 + 100*(edges[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(edges[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+//                     if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                         painter.drawEllipse(QPoint(xp, yp),2,2);
+//                 }
+//             }
 
-            if(normals.size() > 0)
-            {
-                pero.setWidth(6);//hrubka pera -3pixely
-                pero.setColor(Qt::yellow);//farba je zelena
-                painter.setPen(pero);
-                for(int i=0; i < normals.size(); i++)
-                {
-                    int xp=rect.width()-(rect.width()/2 + 100*(normals[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(normals[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
-                    int yp=rect.height()-(rect.height()/2 + 100*(normals[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(normals[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
-                    if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                        painter.drawEllipse(QPoint(xp, yp),2,2);
-                }
-            }
+//             if(normals.size() > 0)
+//             {
+//                 pero.setWidth(6);//hrubka pera -3pixely
+//                 pero.setColor(Qt::yellow);//farba je zelena
+//                 painter.setPen(pero);
+//                 for(int i=0; i < normals.size(); i++)
+//                 {
+//                     int xp=rect.width()-(rect.width()/2 + 100*(normals[i].x - odom.getX())*sin(-odom.getHeading()) + 100*(normals[i].y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+//                     int yp=rect.height()-(rect.height()/2 + 100*(normals[i].x - odom.getX())*cos(-odom.getHeading()) - 100*(normals[i].y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+//                     if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                         painter.drawEllipse(QPoint(xp, yp),2,2);
+//                 }
+//             }
 
-            pero.setWidth(6);//hrubka pera -3pixely
-            painter.setBrush(QBrush());
-            pero.setColor(Qt::magenta);//farba je zelena
-            painter.setPen(pero);
-            xp=rect.width()-(rect.width()/2 + 100*(follwed_point.x - odom.getX())*sin(-odom.getHeading()) + 100*(follwed_point.y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
-            yp=rect.height()-(rect.height()/2 + 100*(follwed_point.x - odom.getX())*cos(-odom.getHeading()) - 100*(follwed_point.y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
-            if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
-                painter.drawEllipse(QPoint(xp, yp),2,2);
+//             pero.setWidth(6);//hrubka pera -3pixely
+//             painter.setBrush(QBrush());
+//             pero.setColor(Qt::magenta);//farba je zelena
+//             painter.setPen(pero);
+//             xp=rect.width()-(rect.width()/2 + 100*(follwed_point.x - odom.getX())*sin(-odom.getHeading()) + 100*(follwed_point.y - odom.getY())*cos(-odom.getHeading())) + rect.topLeft().x();
+//             yp=rect.height()-(rect.height()/2 + 100*(follwed_point.x - odom.getX())*cos(-odom.getHeading()) - 100*(follwed_point.y - odom.getY())*sin(-odom.getHeading())) + rect.topLeft().y();
+//             if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+//                 painter.drawEllipse(QPoint(xp, yp),2,2);
 
-        }
-    }
-}
+//         }
+//     }
+// }
+// void MainWindow::paintEvent(QPaintEvent *event)
+// {
+//     // Prepare canvas (BGR, black background)
+//     cv::Size frameSize(ui->frame->width(), ui->frame->height());
+//     cv::Mat canvas(frameSize, CV_8UC3, cv::Scalar(0, 0, 0));
+
+//     // Draw green border (was QPainter rectangle)
+//     cv::rectangle(canvas, cv::Rect(0, 0, canvas.cols - 1, canvas.rows - 1), cv::Scalar(0, 255, 0), 3);
+
+//     if (useCamera1 && actIndex > -1) {
+//         // Draw camera frame
+//         cv::Mat rgbFrame;
+//         cv::cvtColor(frame[actIndex], rgbFrame, cv::COLOR_BGR2RGB);
+//         cv::resize(rgbFrame, rgbFrame, canvas.size());
+//         rgbFrame.copyTo(canvas);
+//     }
+//     else {
+//         if (updateLaserPicture == 1) {
+//             updateLaserPicture = 0;
+
+//             // Lidar points (green small dots)
+//             for (int k = 0; k < copyOfLaserData.numberOfScans; k++) {
+//                 int dist = copyOfLaserData.Data[k].scanDistance / 20;
+//                 int xp = canvas.cols / 2 - dist * 2 * sin((-copyOfLaserData.Data[k].scanAngle) * CV_PI / 180.0);
+//                 int yp = canvas.rows / 2 - dist * 2 * cos((-copyOfLaserData.Data[k].scanAngle) * CV_PI / 180.0);
+//                 if (xp >= 0 && yp >= 0 && xp < canvas.cols && yp < canvas.rows)
+//                     cv::circle(canvas, cv::Point(xp, yp), 2, cv::Scalar(0, 255, 0), -1);
+//             }
+
+//             // Waypoints (blue)
+//             if (!way_.empty()) {
+//                 for (size_t i = 0; i < way_.size(); i++) {
+//                     int xp = canvas.cols / 2 + 100 * (way_[i].x - odom.getX()) * sin(-odom.getHeading()) +
+//                              100 * (way_[i].y - odom.getY()) * cos(-odom.getHeading());
+//                     int yp = canvas.rows / 2 + 100 * (way_[i].x - odom.getX()) * cos(-odom.getHeading()) -
+//                              100 * (way_[i].y - odom.getY()) * sin(-odom.getHeading());
+//                     if (xp >= 0 && yp >= 0 && xp < canvas.cols && yp < canvas.rows)
+//                         cv::circle(canvas, cv::Point(xp, yp), 2, cv::Scalar(255, 0, 0), -1);
+//                 }
+//             }
+
+//             // Yellow big circle (radius 270)
+//             cv::circle(canvas, cv::Point(canvas.cols / 2, canvas.rows / 2), 270, cv::Scalar(0, 255, 255), 3);
+
+//             // Edges (red)
+//             for (size_t i = 0; i < edges.size(); i++) {
+//                 int xp = canvas.cols / 2 + 100 * (edges[i].x - odom.getX()) * sin(-odom.getHeading()) +
+//                          100 * (edges[i].y - odom.getY()) * cos(-odom.getHeading());
+//                 int yp = canvas.rows / 2 + 100 * (edges[i].x - odom.getX()) * cos(-odom.getHeading()) -
+//                          100 * (edges[i].y - odom.getY()) * sin(-odom.getHeading());
+//                 if (xp >= 0 && yp >= 0 && xp < canvas.cols && yp < canvas.rows)
+//                     cv::circle(canvas, cv::Point(xp, yp), 2, cv::Scalar(0, 0, 255), -1);
+//             }
+
+//             // Normals (yellow)
+//             for (size_t i = 0; i < normals.size(); i++) {
+//                 int xp = canvas.cols / 2 + 100 * (normals[i].x - odom.getX()) * sin(-odom.getHeading()) +
+//                          100 * (normals[i].y - odom.getY()) * cos(-odom.getHeading());
+//                 int yp = canvas.rows / 2 + 100 * (normals[i].x - odom.getX()) * cos(-odom.getHeading()) -
+//                          100 * (normals[i].y - odom.getY()) * sin(-odom.getHeading());
+//                 if (xp >= 0 && yp >= 0 && xp < canvas.cols && yp < canvas.rows)
+//                     cv::circle(canvas, cv::Point(xp, yp), 2, cv::Scalar(0, 255, 255), -1);
+//             }
+
+//             // Followed point (magenta)
+//             int xp_fp = canvas.cols / 2 + 100 * (follwed_point.x - odom.getX()) * sin(-odom.getHeading()) +
+//                         100 * (follwed_point.y - odom.getY()) * cos(-odom.getHeading());
+//             int yp_fp = canvas.rows / 2 + 100 * (follwed_point.x - odom.getX()) * cos(-odom.getHeading()) -
+//                         100 * (follwed_point.y - odom.getY()) * sin(-odom.getHeading());
+//             if (xp_fp >= 0 && yp_fp >= 0 && xp_fp < canvas.cols && yp_fp < canvas.rows)
+//                 cv::circle(canvas, cv::Point(xp_fp, yp_fp), 2, cv::Scalar(255, 0, 255), -1);
+//         }
+//     }
+
+//     // Convert BGR canvas -> QImage
+//     QImage img((uchar*)canvas.data, canvas.cols, canvas.rows, canvas.step, QImage::Format_BGR888);
+
+//     // Draw in widget using QPainter
+//     QPainter painter(this);
+//     painter.drawImage(ui->frame->geometry().topLeft(), img);
+// }
+
+
+// void MainWindow::paintEvent(QPaintEvent *event)
+// {
+//     // Create canvas (black background)
+//     cv::Mat canvas(ui->frame->height(), ui->frame->width(), CV_8UC3, cv::Scalar(0, 0, 0));
+
+//     // Draw lidar points
+//     if (updateLaserPicture == 1) {
+//         updateLaserPicture = 0;
+//         for (int k = 0; k < copyOfLaserData.numberOfScans; k++) {
+//             int dist = copyOfLaserData.Data[k].scanDistance / 20;
+//             int xp = canvas.cols / 2 - dist * 2 * sin((-copyOfLaserData.Data[k].scanAngle) * CV_PI / 180.0);
+//             int yp = canvas.rows / 2 - dist * 2 * cos((-copyOfLaserData.Data[k].scanAngle) * CV_PI / 180.0);
+
+//             if (xp >= 0 && yp >= 0 && xp < canvas.cols && yp < canvas.rows)
+//                 cv::circle(canvas, cv::Point(xp, yp), 2, cv::Scalar(0, 255, 0), -1); // green lidar dot
+//         }
+//     }
+
+//     // Draw robot (big pink circle at center)
+//     cv::circle(canvas, cv::Point(canvas.cols / 2, canvas.rows / 2), 15, cv::Scalar(255, 0, 255), -1);
+
+//     // Convert cv::Mat -> QImage
+//     QImage img((uchar*)canvas.data, canvas.cols, canvas.rows, canvas.step, QImage::Format_BGR888);
+
+//     // Draw image in Qt widget
+//     QPainter painter(this);
+//     painter.drawImage(ui->frame->geometry().topLeft(), img);
+// }
+
+
 
 
 /// toto je slot. niekde v kode existuje signal, ktory je prepojeny. pouziva sa napriklad (v tomto pripade) ak chcete dostat data z jedneho vlakna (robot) do ineho (ui)
@@ -185,8 +301,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     if(first_cycle_)
     {
         odom.setInitState(robotdata.EncoderLeft, robotdata.EncoderRight);
-        map.setGyroStartAngle(robotdata.GyroAngle);
+
         first_cycle_ = false;
+        std::cout << "Som tuu" << std::endl;
     }
 
     ///tu mozete robit s datami z robota
@@ -205,7 +322,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
     odom.update(robotdata.EncoderLeft, robotdata.EncoderRight);
-    map.setGyroAngle(robotdata.GyroAngle);
     if (start_)
     {
         controller.setCurrentPosition(odom);
@@ -242,12 +358,14 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
     updateLaserPicture=1;
-    update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
+    // Process scan
+    mapping->odom_buffer.AddOdometry(
+        Sophus::SE2d(Sophus::SO2d(odom.getHeading()), Eigen::Vector2d(odom.getX(), odom.getY()))
+        );
+    auto laser_ptr = std::make_shared<LaserMeasurement>(laserData);
+    mapping->ProcessScan(laser_ptr);
 
-    if(odom.getAngularSpeed() < fabs(0.001))
-    {
-        map.update(laserData, odom);
-    }
+    // ui->visualizerFrame->setOccupancyGrid(occMap.GetOccupancyGridBlackWhite());
 
     return 0;
 
@@ -340,44 +458,6 @@ void MainWindow::on_pushButton_10_clicked()
     start_ = true;
 }
 
-void MainWindow::on_pushButton_11_clicked()
-{
-    map.printMap();
-}
-
-void MainWindow::on_pushButton_12_clicked()
-{
-    TMapArea map;
-    map_loader loader;
-    loader.load_map("priestor.txt", map);
-    auto occupancy_map = loader.createMap(map);
-    auto bloated_occupancy_map = loader.createBloatedMap();
-    double goal_x = 451.8;
-    double goal_y = 339.11;
-    global_nav = diff_drive::GlobalNav(bloated_occupancy_map, 0, 0, goal_x, goal_y);
-    global_nav.floodFill();
-    /*for (std::size_t y = 0; y<115; ++y)
-    {
-        for (std::size_t x = 0; x<115; ++x)
-        {
-            std::cout << occupancy_map[x][114-y];
-        }
-        std::cout << std::endl;
-    }*/
-    auto path = global_nav.getPath();
-    for (const auto& p : path)
-    {
-        bloated_occupancy_map[p.x][p.y] = 3;
-    }
-    /*for (std::size_t y = 0; y<115; ++y)
-    {
-        for (std::size_t x = 0; x<115; ++x)
-        {
-            std::cout << bloated_occupancy_map[x][114-y];
-        }
-        std::cout << std::endl;
-    }*/
-}
 void MainWindow::on_pushButton_13_clicked()
 {
     start_ = true;
